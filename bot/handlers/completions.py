@@ -10,6 +10,7 @@ Flags (mix & match in any order):
   wrong        — filter wrong completions only
   traces       — full prompt+completion in separate messages
   stats        — aggregate reward trend chart (PNG)
+  baseline     — comprehensive 3x2 analysis across all steps
   brief        — truncate completions (default for non-trace)
 
 Examples:
@@ -76,6 +77,8 @@ def _parse_flags(args: list[str]) -> dict:
         a = args[i].lower()
         if a == "stats":
             opts["mode"] = "stats"
+        elif a == "baseline":
+            opts["mode"] = "baseline"
         elif a == "traces":
             opts["mode"] = "traces"
         elif a == "correct":
@@ -259,7 +262,233 @@ def render_chart(trend):
     buf.seek(0)
     return base64.b64encode(buf.read()).decode()
 
-if mode == "stats":
+if mode == "baseline":
+    import re as _re
+    import numpy as _np
+
+    # Load ALL files
+    all_dfs = []
+    trend = []
+    for f in files:
+        df = pd.read_parquet(f)
+        all_dfs.append(df)
+        trend.append(step_stats(df))
+
+    full = pd.concat(all_dfs, ignore_index=True)
+    has_spec = "spectral_reward_func" in full.columns
+
+    # --- Extract graph complexity from prompts ---
+    def count_nodes(prompt):
+        lines = prompt.split("\\n")
+        n = 0
+        for line in lines:
+            stripped = line.strip()
+            if stripped and "->" in stripped and ":" not in stripped[:3]:
+                continue
+            if stripped and len(stripped) >= 1 and stripped[0].isupper() and (":" in stripped or "->" in stripped):
+                n += 1
+        return n
+
+    full["node_count"] = full["prompt"].apply(count_nodes)
+    full["comp_len"] = full["completion"].str.len()
+    full["correct"] = (full["accuracy_reward_func"] == 1.0)
+
+    # --- Per-step trend (already have) ---
+    steps = [t["step"] for t in trend]
+    acc_pct = [t["acc_pos"] / t["n"] * 100 for t in trend]
+    fmt_vals = [t["fmt_mean"] for t in trend]
+    spec_vals = [t.get("spec_mean", 0) for t in trend]
+    comp_lens = [t["comp_len_mean"] for t in trend]
+
+    # --- Aggregate stats ---
+    total_completions = len(full)
+    total_correct = int(full["correct"].sum())
+    overall_acc = total_correct / total_completions * 100
+    avg_comp_len = float(full["comp_len"].mean())
+    median_comp_len = float(full["comp_len"].median())
+    avg_fmt = float(full["format_reward_func"].mean())
+    avg_spec = float(full["spectral_reward_func"].mean()) if has_spec else None
+    avg_adv = float(full["advantage"].mean())
+
+    # Accuracy by completion length quartile
+    full["len_q"] = pd.qcut(full["comp_len"], 4, labels=["short", "medium", "long", "very_long"], duplicates="drop")
+    acc_by_len = full.groupby("len_q", observed=True)["correct"].mean().to_dict()
+    acc_by_len = {{k: round(float(v) * 100, 1) for k, v in acc_by_len.items()}}
+
+    # Correct vs wrong completion length
+    correct_len = float(full[full["correct"]]["comp_len"].mean()) if total_correct > 0 else 0
+    wrong_len = float(full[~full["correct"]]["comp_len"].mean()) if total_correct < total_completions else 0
+
+    # First half vs second half accuracy
+    mid = len(trend) // 2
+    first_half_acc = sum(t["acc_pos"] for t in trend[:mid]) / sum(t["n"] for t in trend[:mid]) * 100 if mid > 0 else 0
+    second_half_acc = sum(t["acc_pos"] for t in trend[mid:]) / sum(t["n"] for t in trend[mid:]) * 100
+
+    # Spectral correlation with accuracy
+    spec_corr = None
+    if has_spec:
+        spec_corr = float(full["spectral_reward_func"].corr(full["accuracy_reward_func"]))
+
+    # --- Render 3x2 baseline chart ---
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    fig, axes = plt.subplots(3, 2, figsize=(14, 12))
+    fig.patch.set_facecolor("#1a1a2e")
+    fig.suptitle(f"BASELINE REPORT  |  {{len(files)}} steps  |  {{total_completions}} completions", color="#e0e0e0", fontsize=14, fontweight="bold")
+
+    def style_ax(ax):
+        ax.set_facecolor("#16213e")
+        ax.tick_params(colors="#e0e0e0", labelsize=8)
+        for spine in ["bottom", "left"]:
+            ax.spines[spine].set_color("#333")
+        for spine in ["top", "right"]:
+            ax.spines[spine].set_visible(False)
+        ax.yaxis.label.set_color("#e0e0e0")
+        ax.xaxis.label.set_color("#e0e0e0")
+        ax.title.set_color("#e0e0e0")
+
+    for ax_row in axes:
+        for ax in ax_row:
+            style_ax(ax)
+
+    def smooth(y, w=5):
+        if len(y) < w:
+            return y
+        return np.convolve(y, np.ones(w)/w, mode="valid").tolist()
+
+    # (0,0) Accuracy trend
+    ax = axes[0][0]
+    ax.plot(steps, acc_pct, alpha=0.3, color="#4cc9f0", linewidth=0.8)
+    sm = smooth(acc_pct)
+    ax.plot(steps[len(steps)-len(sm):], sm, color="#4cc9f0", linewidth=2)
+    ax.axhline(y=50, color="#555", linestyle="--", linewidth=0.5)
+    ax.set_ylabel("Accuracy %")
+    ax.set_ylim(-5, 105)
+    ax.set_title("Accuracy Over Training")
+
+    # (0,1) Reward distributions (histogram)
+    ax = axes[0][1]
+    ax.hist(full["accuracy_reward_func"].values, bins=20, color="#4cc9f0", alpha=0.7, label="accuracy")
+    ax.hist(full["format_reward_func"].values, bins=20, color="#f72585", alpha=0.5, label="format")
+    if has_spec:
+        ax.hist(full["spectral_reward_func"].values, bins=20, color="#4361ee", alpha=0.5, label="spectral")
+    ax.legend(facecolor="#16213e", edgecolor="#333", labelcolor="#e0e0e0", fontsize=7)
+    ax.set_title("Reward Distributions (all steps)")
+    ax.set_ylabel("Count")
+
+    # (1,0) Format + spectral trend
+    ax = axes[1][0]
+    ax.plot(steps, fmt_vals, alpha=0.3, color="#f72585", linewidth=0.8)
+    sm_fmt = smooth(fmt_vals)
+    ax.plot(steps[len(steps)-len(sm_fmt):], sm_fmt, color="#f72585", linewidth=2, label="format")
+    if has_spec:
+        ax2 = ax.twinx()
+        ax2.plot(steps, spec_vals, alpha=0.3, color="#4361ee", linewidth=0.8)
+        sm_spec = smooth(spec_vals)
+        ax2.plot(steps[len(steps)-len(sm_spec):], sm_spec, color="#4361ee", linewidth=2, label="spectral")
+        ax2.set_ylabel("Spectral", color="#4361ee")
+        ax2.tick_params(colors="#4361ee", labelsize=8)
+        ax2.spines["right"].set_color("#4361ee")
+        ax2.spines["top"].set_visible(False)
+        ax2.legend(loc="upper right", facecolor="#16213e", edgecolor="#333", labelcolor="#e0e0e0", fontsize=7)
+    ax.set_ylabel("Format Reward")
+    ax.set_title("Format & Spectral Trends")
+    ax.legend(loc="upper left", facecolor="#16213e", edgecolor="#333", labelcolor="#e0e0e0", fontsize=7)
+
+    # (1,1) Completion length distribution: correct vs wrong
+    ax = axes[1][1]
+    bins = np.linspace(0, full["comp_len"].quantile(0.95), 30)
+    if total_correct > 0:
+        ax.hist(full[full["correct"]]["comp_len"].values, bins=bins, color="#06d6a0", alpha=0.6, label=f"correct (avg {{correct_len:.0f}})")
+    if total_correct < total_completions:
+        ax.hist(full[~full["correct"]]["comp_len"].values, bins=bins, color="#ef476f", alpha=0.5, label=f"wrong (avg {{wrong_len:.0f}})")
+    ax.legend(facecolor="#16213e", edgecolor="#333", labelcolor="#e0e0e0", fontsize=7)
+    ax.set_title("Completion Length: Correct vs Wrong")
+    ax.set_xlabel("Characters")
+    ax.set_ylabel("Count")
+
+    # (2,0) Completion length over training
+    ax = axes[2][0]
+    ax.plot(steps, comp_lens, alpha=0.3, color="#7209b7", linewidth=0.8)
+    sm_cl = smooth(comp_lens)
+    ax.plot(steps[len(steps)-len(sm_cl):], sm_cl, color="#7209b7", linewidth=2)
+    ax.set_ylabel("Avg Characters")
+    ax.set_xlabel("Step")
+    ax.set_title("Completion Length Over Training")
+
+    # (2,1) Summary text card
+    ax = axes[2][1]
+    ax.axis("off")
+    summary_lines = [
+        f"Total completions:  {{total_completions}}",
+        f"Overall accuracy:   {{overall_acc:.1f}}%",
+        f"  1st half:         {{first_half_acc:.1f}}%",
+        f"  2nd half:         {{second_half_acc:.1f}}%",
+        f"",
+        f"Avg completion len: {{avg_comp_len:.0f}} chars (median {{median_comp_len:.0f}})",
+        f"  correct avg:      {{correct_len:.0f}} chars",
+        f"  wrong avg:        {{wrong_len:.0f}} chars",
+        f"",
+        f"Mean format reward: {{avg_fmt:.3f}}",
+    ]
+    if avg_spec is not None:
+        summary_lines.append(f"Mean spectral:      {{avg_spec:.4f}}")
+    if spec_corr is not None:
+        summary_lines.append(f"Spectral~accuracy:  r={{spec_corr:.3f}}")
+    summary_lines.append(f"Mean advantage:     {{avg_adv:.3f}}")
+    if acc_by_len:
+        summary_lines.append("")
+        summary_lines.append("Accuracy by length quartile:")
+        for q, v in acc_by_len.items():
+            summary_lines.append(f"  {{q}}: {{v:.1f}}%")
+
+    ax.text(0.05, 0.95, "\\n".join(summary_lines), transform=ax.transAxes,
+            fontsize=9, verticalalignment="top", fontfamily="monospace",
+            color="#e0e0e0",
+            bbox=dict(boxstyle="round,pad=0.5", facecolor="#16213e", edgecolor="#333"))
+
+    plt.tight_layout()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    buf.seek(0)
+    chart_b64 = base64.b64encode(buf.read()).decode()
+
+    # Build text caption
+    caption = f"Baseline: {{len(files)}} steps, {{total_completions}} completions\\n"
+    caption += f"Accuracy: {{overall_acc:.1f}}% ({{first_half_acc:.1f}}% -> {{second_half_acc:.1f}}%)\\n"
+    caption += f"Completion: {{avg_comp_len:.0f}} chars (correct={{correct_len:.0f}}, wrong={{wrong_len:.0f}})\\n"
+    caption += f"Format: {{avg_fmt:.3f}}"
+    if avg_spec is not None:
+        caption += f"  Spectral: {{avg_spec:.4f}}"
+    if spec_corr is not None:
+        caption += f"  (r={{spec_corr:.3f}} w/ acc)"
+
+    result = {{
+        "type": "baseline",
+        "chart": chart_b64,
+        "caption": caption,
+        "summary": {{
+            "total_steps": len(files),
+            "total_completions": total_completions,
+            "overall_acc": overall_acc,
+            "first_half_acc": first_half_acc,
+            "second_half_acc": second_half_acc,
+            "avg_comp_len": avg_comp_len,
+            "correct_len": correct_len,
+            "wrong_len": wrong_len,
+            "avg_fmt": avg_fmt,
+            "avg_spec": avg_spec,
+            "spec_corr": spec_corr,
+            "acc_by_len": acc_by_len,
+        }},
+    }}
+    print(json.dumps(result))
+
+elif mode == "stats":
     use_files = select_files(files, step_sel) if step_sel else files
     if use_files is None or len(use_files) == 0:
         print(json.dumps({{"error": f"Index out of range. {{len(files)}} files available."}}))
@@ -349,6 +578,7 @@ async def completions_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
             "Usage: /completions <project> [flags...]\n\n"
             "Flags (mix & match):\n"
             "  stats        — reward trend chart (PNG)\n"
+            "  baseline     — full analysis across all steps\n"
             "  traces       — full prompt+completion\n"
             "  step <IDX>   — Python-style index/slice\n"
             "                  e.g. 0, -1, -3:, 0:5, ::2\n"
@@ -397,7 +627,7 @@ async def completions_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         label += f" {opts['filter']}"
     await update.message.reply_text(f"Analyzing {name} completions ({label})...")
 
-    timeout = 120 if opts["mode"] == "stats" else 60
+    timeout = 180 if opts["mode"] == "baseline" else 120 if opts["mode"] == "stats" else 60
     raw = await ssh_exec(proj["remote"], cmd, timeout=timeout)
     if not raw.strip():
         await update.message.reply_text("No output from remote script.")
@@ -414,7 +644,15 @@ async def completions_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.message.reply_text(data["error"])
         return
 
-    if data["type"] == "stats":
+    if data["type"] == "baseline":
+        # Send 3x2 chart + caption
+        img_bytes = base64.b64decode(data["chart"])
+        await update.message.reply_photo(
+            photo=io.BytesIO(img_bytes),
+            caption=data.get("caption", ""),
+        )
+
+    elif data["type"] == "stats":
         # Send chart as photo
         img_bytes = base64.b64decode(data["chart"])
         await update.message.reply_photo(

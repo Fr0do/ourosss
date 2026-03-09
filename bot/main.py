@@ -50,6 +50,7 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"/ckpt _project_ — list checkpoints\n"
         f"/completions _project_ — latest step dashboard\n"
         f"/completions _project_ stats — accuracy trend chart\n"
+        f"/completions _project_ baseline — full analysis report\n"
         f"/completions _project_ traces \\[N] — full traces\n"
         f"/completions _project_ step _IDX_ — python index/slice\n"
         f"  _e\\.g\\. 0, \\-1, \\-3:, 0:5, ::2_\n\n"

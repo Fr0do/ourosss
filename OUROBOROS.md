@@ -191,6 +191,7 @@ Ouroboros (root page)
 - **#15** s_cot paper: finalize results + theoretical analysis
 
 ## Version
+- v6.29.0 — 2026-03-09 — /completions baseline, /feature→GH issues, /vitals, issue journaling, disk 6h timeout
 - v6.28.5 — 2026-03-09 — Team mode operational: /team bot command, task queue, workers completed auth+CI+lint
 - v6.28.4 — 2026-03-09 — Deep research (22 refs), curriculum dataset, RCD refactor, crashlog, task backlog
 - v6.28.3 (τ) — 2026-03-09 — Telegram bot, GRPO completions, research governance

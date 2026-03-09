@@ -141,9 +141,16 @@ Ouroboros (root page)
 
 ## Agent Conventions
 
+### Issues-First Workflow
+- **Journaling**: when a user request is a meaningful feature or fix, create a GitHub issue first, then implement and reference it in the commit
+- Keeps a public trail of decisions, rationale, and evolution — the project's journal
+- Trivial fixes (typos, one-liners) skip the issue — use judgment
+- Issue title: short and descriptive. Body: context, motivation, acceptance criteria when relevant
+
 ### Git Workflow
 - **Default: commit & push** for routine changes — no confirmation needed
 - **PR + Telegram notify** only for major changes requiring review
+- Reference issue numbers in commits (`fixes #N`) to auto-close
 - Don't edit local s_cot — update remote via scp or provide filenames
 - Don't auto-run training — let user debug and launch
 

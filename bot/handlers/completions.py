@@ -33,6 +33,7 @@ from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 from ..services.config import PROJECTS
 from ..services.ssh import ssh_exec
+from ..services.tg import send_long, require_project
 
 PYTHON = "/workspace-SR004.nfs2/kurkin/envs/kurkin_313_torch/bin/python"
 
@@ -340,19 +341,6 @@ def _fmt_trace(s: dict, idx: int) -> str:
     return "\n".join(parts)
 
 
-async def _send_long(update: Update, text: str, **kwargs):
-    """Send text, splitting into multiple messages if needed."""
-    while text:
-        chunk = text[:4000]
-        # Try to break at newline
-        if len(text) > 4000:
-            nl = chunk.rfind("\n")
-            if nl > 2000:
-                chunk = text[:nl]
-        await update.message.reply_text(chunk, **kwargs)
-        text = text[len(chunk):]
-
-
 async def completions_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/completions <project> [flags...]"""
     args = context.args or []
@@ -378,9 +366,9 @@ async def completions_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         )
         return
 
-    name = args[0]
-    if name not in PROJECTS:
-        await update.message.reply_text(f"Unknown project. Available: {', '.join(PROJECTS)}")
+    name, err = require_project(args, "/completions <project> [flags...]")
+    if err:
+        await update.message.reply_text(err)
         return
 
     comp_subdir = COMPLETIONS_DIRS.get(name)
@@ -419,7 +407,7 @@ async def completions_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         data = json.loads(raw)
     except json.JSONDecodeError:
         # Script printed plain text (error or debug)
-        await _send_long(update, raw)
+        await send_long(update, raw)
         return
 
     if "error" in data:
@@ -445,7 +433,7 @@ async def completions_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         # Each trace as a separate message
         for i, s in enumerate(data["samples"], 1):
             trace = _fmt_trace(s, i)
-            await _send_long(update, trace)
+            await send_long(update, trace)
 
     else:
         # Dashboard: stats header + brief samples inline
@@ -455,7 +443,7 @@ async def completions_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
             parts.append("")
             parts.append(_fmt_sample_brief(s))
         text = "\n".join(parts)
-        await _send_long(update, text)
+        await send_long(update, text)
 
 
 handler = CommandHandler("completions", completions_handler)

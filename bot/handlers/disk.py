@@ -20,16 +20,13 @@ async def disk_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if sub == "scan":
         top_n = int(args[1]) if len(args) > 1 else 20
         msg = await update.message.reply_text("Starting dua scan (may take minutes)...")
-        # Run dua in background so bot stays responsive
-        loop = asyncio.get_event_loop()
-
         async def _scan():
             await refresh_df()
             state = await refresh_dua(top_n)
             report = format_report(state)
             await msg.edit_text(report, parse_mode="Markdown")
 
-        asyncio.ensure_future(_scan())
+        asyncio.create_task(_scan())
         return
 
     if sub == "me":
@@ -40,7 +37,7 @@ async def disk_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             report = format_my_report(state)
             await msg.edit_text(report, parse_mode="Markdown")
 
-        asyncio.ensure_future(_my_scan())
+        asyncio.create_task(_my_scan())
         return
 
     # Default: quick df refresh + cached dua

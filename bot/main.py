@@ -4,6 +4,7 @@ from telegram import Update, BotCommand
 from telegram.ext import Application, ContextTypes, CommandHandler
 
 from .services.config import TELEGRAM_TOKEN, AUTHORIZED_USERS, PROJECTS
+from .services.ssh import gpu_status
 from .handlers.status import handler as status_handler
 from .handlers.run import handler as run_handler
 from .handlers.stop import handler as stop_handler
@@ -68,8 +69,6 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def gpu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/gpu — show GPU status from all remotes."""
-    from .services.ssh import gpu_status
-
     hosts_seen = set()
     lines = []
     for proj in PROJECTS.values():

@@ -18,6 +18,23 @@ CRIT_PERCENT = 95
 HISTORY_MAX = 48  # keep ~2 days of hourly samples
 
 
+def _parse_dua_output(output: str) -> list[dict] | None:
+    """Parse dua output into list of {size, path} entries."""
+    if not output or "No such file" in output:
+        return None
+    entries = []
+    for line in output.strip().split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        parts = line.split(None, 2)
+        if len(parts) >= 3:
+            entries.append({"size": f"{parts[0]} {parts[1]}", "path": parts[2]})
+        elif len(parts) == 2:
+            entries.append({"size": parts[0], "path": parts[1]})
+    return entries
+
+
 def load_state() -> dict:
     if STATE_FILE.exists():
         try:
@@ -68,17 +85,8 @@ async def refresh_dua(top_n: int = 20) -> dict:
     state = load_state()
     state["dua_updated"] = time.strftime("%Y-%m-%d %H:%M")
 
-    if output and "No such file" not in output:
-        entries = []
-        for line in output.strip().split("\n"):
-            line = line.strip()
-            if not line:
-                continue
-            parts = line.split(None, 2)
-            if len(parts) >= 3:
-                entries.append({"size": f"{parts[0]} {parts[1]}", "path": parts[2]})
-            elif len(parts) == 2:
-                entries.append({"size": parts[0], "path": parts[1]})
+    entries = _parse_dua_output(output)
+    if entries is not None:
         state["top_dirs"] = entries
     else:
         state["dua_error"] = output or "empty"
@@ -98,17 +106,8 @@ async def refresh_my_usage() -> dict:
     state = load_state()
     state["my_updated"] = time.strftime("%Y-%m-%d %H:%M")
 
-    if output and "No such file" not in output:
-        entries = []
-        for line in output.strip().split("\n"):
-            line = line.strip()
-            if not line:
-                continue
-            parts = line.split(None, 2)
-            if len(parts) >= 3:
-                entries.append({"size": f"{parts[0]} {parts[1]}", "path": parts[2]})
-            elif len(parts) == 2:
-                entries.append({"size": parts[0], "path": parts[1]})
+    entries = _parse_dua_output(output)
+    if entries is not None:
         state["my_dirs"] = entries
     else:
         state["my_error"] = output or "empty"

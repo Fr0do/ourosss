@@ -2,18 +2,14 @@ from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 from ..services.config import PROJECTS
 from ..services.ssh import ssh_exec
+from ..services.tg import require_project
 
 
 async def stop_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/stop <project> — send Ctrl-C to project's tmux session."""
-    args = context.args or []
-    if not args:
-        await update.message.reply_text("Usage: `/stop <project>`", parse_mode="Markdown")
-        return
-
-    name = args[0]
-    if name not in PROJECTS:
-        await update.message.reply_text(f"Unknown project. Available: {', '.join(PROJECTS)}")
+    name, err = require_project(context.args or [], "/stop <project>")
+    if err:
+        await update.message.reply_text(err, parse_mode="Markdown")
         return
 
     proj = PROJECTS[name]

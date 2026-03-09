@@ -2,18 +2,14 @@ import asyncio
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 from ..services.config import PROJECTS
+from ..services.tg import require_project
 
 
 async def sync_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/sync <project> [subpath] — rsync results from remote to local."""
-    args = context.args or []
-    if not args:
-        await update.message.reply_text("Usage: `/sync <project> [subpath]`", parse_mode="Markdown")
-        return
-
-    name = args[0]
-    if name not in PROJECTS:
-        await update.message.reply_text(f"Unknown project. Available: {', '.join(PROJECTS)}")
+    name, err = require_project(context.args or [], "/sync <project> [subpath]")
+    if err:
+        await update.message.reply_text(err, parse_mode="Markdown")
         return
 
     proj = PROJECTS[name]
@@ -22,6 +18,7 @@ async def sync_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"No local path configured for *{name}*.", parse_mode="Markdown")
         return
 
+    args = context.args
     subpath = args[1] if len(args) > 1 else ""
     remote_path = f"{proj['path']}/{subpath}".rstrip("/") + "/"
     local_path = f"{local}/{subpath}".rstrip("/") + "/"
@@ -44,13 +41,12 @@ async def sync_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     out = stdout.decode().strip()
-    # Show just the summary
     summary_lines = [l for l in out.split("\n") if l.startswith("sent ") or l.startswith("total ") or "speedup" in l]
     summary = "\n".join(summary_lines[-3:]) if summary_lines else out[-500:]
 
     if proc.returncode != 0:
-        err = stderr.decode().strip()
-        await update.message.reply_text(f"Sync error:\n```\n{err[:1000]}\n```", parse_mode="Markdown")
+        err_text = stderr.decode().strip()
+        await update.message.reply_text(f"Sync error:\n```\n{err_text[:1000]}\n```", parse_mode="Markdown")
     else:
         await update.message.reply_text(f"Synced *{name}*:\n```\n{summary}\n```", parse_mode="Markdown")
 

@@ -2,22 +2,17 @@ from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 from ..services.config import PROJECTS
 from ..services.ssh import ssh_exec
+from ..services.tg import require_project
 
 
 async def ckpt_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/ckpt <project> — list checkpoints with step, size, date."""
-    args = context.args or []
-    if not args:
-        await update.message.reply_text("Usage: `/ckpt <project>`", parse_mode="Markdown")
-        return
-
-    name = args[0]
-    if name not in PROJECTS:
-        await update.message.reply_text(f"Unknown project. Available: {', '.join(PROJECTS)}")
+    name, err = require_project(context.args or [], "/ckpt <project>")
+    if err:
+        await update.message.reply_text(err, parse_mode="Markdown")
         return
 
     proj = PROJECTS[name]
-    # Find checkpoint dirs: look for common patterns
     cmd = (
         f"cd {proj['path']} && "
         f"find . -maxdepth 3 -type d -name 'checkpoint-*' -o -name 'step_*' -o -name 'epoch_*' | "

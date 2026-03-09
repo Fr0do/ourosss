@@ -3,20 +3,17 @@ from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 from ..services.config import PROJECTS
 from ..services.ssh import ssh_tmux_capture
+from ..services.tg import require_project
 
 
 async def metrics_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/metrics <project> [n=50] — extract training metrics from recent tmux output."""
-    args = context.args or []
-    if not args:
-        await update.message.reply_text("Usage: `/metrics <project> [lines]`", parse_mode="Markdown")
+    name, err = require_project(context.args or [], "/metrics <project> [lines]")
+    if err:
+        await update.message.reply_text(err, parse_mode="Markdown")
         return
 
-    name = args[0]
-    if name not in PROJECTS:
-        await update.message.reply_text(f"Unknown project. Available: {', '.join(PROJECTS)}")
-        return
-
+    args = context.args
     n = int(args[1]) if len(args) > 1 else 50
     proj = PROJECTS[name]
     raw = await ssh_tmux_capture(proj["remote"], proj["tmux"], lines=n)
@@ -25,7 +22,6 @@ async def metrics_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"No output from *{name}*.", parse_mode="Markdown")
         return
 
-    # Extract lines with common metric patterns
     metric_patterns = re.compile(
         r"(loss|accuracy|acc|reward|lr|learning.rate|step|epoch|eval|train|grad.norm"
         r"|perplexity|ppl|f1|bleu|rouge|score|metric|val)"
@@ -40,7 +36,6 @@ async def metrics_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             metric_lines.append(line)
 
     if not metric_lines:
-        # Fallback: show lines with numbers that look like progress
         progress = re.compile(r"\d+[/|]\d+|\d+\.\d{2,}")
         metric_lines = [l.strip() for l in raw.split("\n") if progress.search(l)]
 
@@ -51,7 +46,6 @@ async def metrics_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # Keep last 15 metric lines
     output = "\n".join(metric_lines[-15:])
     if len(output) > 3900:
         output = output[-3900:]

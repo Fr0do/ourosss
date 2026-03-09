@@ -177,10 +177,12 @@ Ouroboros (root page)
 - **#13** s_cot: run curriculum GRPO training sweep
 - **#14** s_cot: ablation experiments (spectral on/off, curriculum, conciseness)
 - **#15** s_cot paper: finalize results + theoretical analysis
-- **#16** bot: code hygiene pass (extract shared helpers)
-- **#17** CI: implement upstream sync + remote health ping
+- ~~**#16** bot: code hygiene pass~~ → done (auth decorator, lint cleanup)
+- ~~**#17** CI: upstream sync + health ping~~ → done (upstream-sync.yml, health-ping.yml)
+- ~~**#18** team: integrate multi-agent workflow~~ → done (/team command, task queue)
 
 ## Version
+- v6.28.5 — 2026-03-09 — Team mode operational: /team bot command, task queue, workers completed auth+CI+lint
 - v6.28.4 — 2026-03-09 — Deep research (22 refs), curriculum dataset, RCD refactor, crashlog, task backlog
 - v6.28.3 (τ) — 2026-03-09 — Telegram bot, GRPO completions, research governance
 - v0.1.0 — 2026-03-08 — Initial bootstrap via Cowork

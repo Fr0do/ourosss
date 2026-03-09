@@ -1,4 +1,4 @@
-name: Bot Lint
+name: Lint
 
 on:
   push:
@@ -16,17 +16,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install minimal deps
-        run: pip install python-telegram-bot python-dotenv notion-client
+      - name: Install pre-commit
+        run: pip install pre-commit
 
-      - name: Compile-check all bot modules
-        run: |
-          find bot -name '*.py' | while read f; do
-            python -m py_compile "$f" || exit 1
-          done
-
-      - name: Compile-check top-level scripts
-        run: |
-          for f in notion_bootstrap.py; do
-            [ -f "$f" ] && python -m py_compile "$f"
-          done
+      - name: Run pre-commit
+        run: pre-commit run --all-files

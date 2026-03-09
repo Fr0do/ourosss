@@ -1,0 +1,36 @@
+name: RFC
+description: Propose a research design decision, architecture change, or new approach
+title: "[RFC] "
+labels: [rfc]
+body:
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why is this change needed? What problem does it solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-change
+    attributes:
+      label: Proposed Change
+      description: What do you want to do? Be specific about the approach.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-outcome
+    attributes:
+      label: Expected Outcome
+      description: What does success look like? How will you measure it?
+
+  - type: checkboxes
+    id: projects
+    attributes:
+      label: Affected Projects
+      options:
+        - label: s_cot (Spectral-R1)
+        - label: long-vqa (MMReD)
+        - label: bbbo (optimizer)
+        - label: ouroboros (meta-project)

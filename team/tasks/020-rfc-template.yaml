@@ -1,0 +1,13 @@
+id: "020"
+status: done
+title: "Add RFC and bug report issue templates"
+project: ouroboros
+priority: normal
+context: |
+  Add structured GitHub issue templates for RFCs and bug reports.
+depends_on: []
+assigned_to: 1
+created: "2026-03-09T18:00:00"
+claimed_by: 1
+completed: "2026-03-09T18:30:00"
+result_file: null

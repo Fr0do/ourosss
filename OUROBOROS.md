@@ -147,6 +147,8 @@ Ouroboros (root page)
 
 ### Issues-First Workflow
 - **Journaling**: when a user request is a meaningful feature or fix, create a GitHub issue first, then implement and reference it in the commit
+- **Progress comments**: comment on the issue with what was done, issues hit, and commit hashes before closing
+- **Reopen if needed**: if an issue is closed prematurely (e.g. by `fixes #N` but follow-up work remains), reopen it
 - Keeps a public trail of decisions, rationale, and evolution — the project's journal
 - Trivial fixes (typos, one-liners) skip the issue — use judgment
 - Issue title: short and descriptive. Body: context, motivation, acceptance criteria when relevant

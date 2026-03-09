@@ -30,7 +30,14 @@ Active via Claude Code hook. All shell ops auto-optimized.
 | bot/services/ssh.py | SSH/tmux/GPU operations |
 | notion_bootstrap.py | One-time Notion workspace setup |
 
+## Issue Journaling
+- **Create issues** for meaningful features/fixes before implementing
+- **Comment progress** on issues: what was done, blockers hit, commit hashes
+- **Reference in commits**: `fixes #N` to auto-close, or mention `#N` if work continues
+- **Triage at session start**: check `gh issue list --repo Fr0do/ouroboros --state open`
+
 ## Commit Conventions
+- Prefix: `[feat]`, `[fix]`, `[doc]`, `[infra]`, `[bot]`, `[s_cot]`
 - Include a summary of major edits in commit messages (not just what changed in this repo)
 - For remote-only changes (e.g. s_cot training code uploaded via scp), document them in the commit body
 - Format: short title line, blank line, bullet list of all significant changes including remote/subproject work

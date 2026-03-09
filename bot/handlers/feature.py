@@ -10,6 +10,7 @@ import logging
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 
+from ..services.config import GH_BIN
 from ..services.tg import authorized
 
 logger = logging.getLogger("ouroboros")
@@ -53,7 +54,7 @@ async def feature_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         proc = await asyncio.create_subprocess_exec(
-            "gh", "issue", "create",
+            GH_BIN, "issue", "create",
             "--repo", REPO,
             "--title", title,
             "--body", body,

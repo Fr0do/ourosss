@@ -8,6 +8,7 @@ load_dotenv(ROOT / ".env")
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 NOTION_SECRET = os.getenv("NOTION_SECRET", "")
 BOT_TMUX_SESSION = os.getenv("BOT_TMUX_SESSION", "ouro")
+GH_BIN = os.getenv("GH_BIN", os.path.expanduser("~/.local/bin/gh"))
 
 # First run: send /start to bot, copy your user ID here
 AUTHORIZED_USERS: set[int] = set()

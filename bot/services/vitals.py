@@ -3,6 +3,8 @@ import asyncio
 import logging
 from pathlib import Path
 
+from .config import GH_BIN
+
 logger = logging.getLogger("ouroboros")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -149,11 +151,11 @@ async def github_stats() -> dict:
 
     # Open issues
     rc_open, out_open = await _run(
-        "gh", "issue", "list", "--state=open", "--json=number", "--jq=length",
+        GH_BIN, "issue", "list", "--state=open", "--json=number", "--jq=length",
     )
     # Closed issues
     rc_closed, out_closed = await _run(
-        "gh", "issue", "list", "--state=closed", "--json=number", "--jq=length",
+        GH_BIN, "issue", "list", "--state=closed", "--json=number", "--jq=length",
     )
 
     open_n = 0
@@ -169,7 +171,7 @@ async def github_stats() -> dict:
 
     # Latest release
     rc, out = await _run(
-        "gh", "release", "view", "--json=tagName", "--jq=.tagName",
+        GH_BIN, "release", "view", "--json=tagName", "--jq=.tagName",
     )
     result["latest_release"] = out if rc == 0 and out else None
 

@@ -166,6 +166,14 @@ Ouroboros (root page)
 
 ---
 
+## Active Task Backlog (GitHub Issues)
+- **#13** s_cot: run curriculum GRPO training sweep
+- **#14** s_cot: ablation experiments (spectral on/off, curriculum, conciseness)
+- **#15** s_cot paper: finalize results + theoretical analysis
+- **#16** bot: code hygiene pass (extract shared helpers)
+- **#17** CI: implement upstream sync + remote health ping
+
 ## Version
+- v6.28.4 — 2026-03-09 — Deep research (22 refs), curriculum dataset, RCD refactor, crashlog, task backlog
 - v6.28.3 (τ) — 2026-03-09 — Telegram bot, GRPO completions, research governance
 - v0.1.0 — 2026-03-08 — Initial bootstrap via Cowork

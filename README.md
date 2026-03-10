@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/RTK-60–90%25_token_savings-brightgreen" alt="RTK savings">
+  <img src="https://img.shields.io/badge/RTK-82.8%25_saved_·_166K_tokens-brightgreen" alt="RTK savings">
   <img src="https://img.shields.io/github/v/release/Fr0do/ouroboros?label=release" alt="Latest release">
   <img src="https://img.shields.io/github/issues/Fr0do/ouroboros" alt="Open issues">
   <img src="https://img.shields.io/github/stars/Fr0do/ouroboros" alt="Stars">

@@ -189,6 +189,7 @@ Ouroboros (root page)
 All current issues resolved. Check `gh issue list --state open` for latest.
 
 ## Version
+- v6.30.0 — 2026-03-10 — GitHub Pages site (fr0do.github.io), /page command, /project-page skill, auto-vitals
 - v6.29.0 — 2026-03-09 — /completions baseline, /feature→GH issues, /vitals, issue journaling, disk 6h timeout
 - v6.28.4 — 2026-03-09 — Deep research (22 refs), curriculum dataset, RCD refactor, crashlog, task backlog
 - v6.28.3 (τ) — 2026-03-09 — Telegram bot, GRPO completions, research governance

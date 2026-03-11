@@ -13,7 +13,7 @@ issues_json=$(gh issue list --repo Fr0do/ouroboros --label auto-dev --state open
 [ -z "$issues_json" ] && exit 0
 
 # Always skip research projects + user-defined patterns
-all_skip="s_cot,long-vqa,bbbo${AUTO_DEV_SKIP:+,$AUTO_DEV_SKIP}"
+all_skip="s_cot,mmred,bbbo${AUTO_DEV_SKIP:+,$AUTO_DEV_SKIP}"
 jq_filter='.'
 for pat in $(echo "$all_skip" | tr ',' ' '); do
     pat_lower=$(echo "$pat" | tr '[:upper:]' '[:lower:]')

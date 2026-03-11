@@ -9,7 +9,7 @@
 #
 # Skip patterns match against issue titles (case-insensitive).
 # Persistent skips via AUTO_DEV_SKIP env var (comma-separated):
-#   AUTO_DEV_SKIP="s_cot,bbbo,long-vqa" ./scripts/auto-dev.sh
+#   AUTO_DEV_SKIP="s_cot,bbbo,mmred" ./scripts/auto-dev.sh
 #
 # Priority: auto-dev labeled issues first, then oldest open issue.
 # The agent can escalate to team mode for complex issues.
@@ -29,7 +29,7 @@ SKIP_ISSUES=""        # space-separated issue numbers to skip (runtime)
 SKIP_PATTERNS=""      # space-separated title patterns to skip (case-insensitive)
 
 # Research projects are never auto-dev targets
-SKIP_PATTERNS="s_cot long-vqa bbbo"
+SKIP_PATTERNS="s_cot mmred bbbo"
 
 # Load additional skips from env (comma-separated)
 if [ -n "${AUTO_DEV_SKIP:-}" ]; then

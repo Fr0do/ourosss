@@ -21,6 +21,7 @@ from .handlers.vitals import handler as vitals_handler
 from .handlers.feature import handler as feature_handler
 from .handlers.page import handler as page_handler
 from .handlers.qr import handler as qr_handler, photo_handler as qr_photo_handler
+from .handlers.eval import handler as eval_handler
 
 LOG_FILE = "bot.log"
 logging.basicConfig(
@@ -76,6 +77,10 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"/page — update project page with current vitals\n"
         f"/page _text_ — add status entry to timeline\n"
         f"/page finding _title_ \\| _body_ — tagged entry\n\n"
+        f"*Eval Tracking*\n"
+        f"/eval push _ckpt step bench topo acc fmt len_ — push to Notion\n"
+        f"/eval list \\[limit] — recent eval results\n"
+        f"/eval summary — latest per benchmark\n\n"
         f"*System*\n"
         f"/crashlog _project_ — dump tmux scrollback on crash\n"
         f"/update — git pull \\+ restart\n"
@@ -125,6 +130,7 @@ async def post_init(app: Application):
         BotCommand("qr", "Generate QR code / mosaic"),
         BotCommand("feature", "File a feature request"),
         BotCommand("page", "Update project page"),
+        BotCommand("eval", "Eval tracking (Notion)"),
     ])
 
 
@@ -163,6 +169,7 @@ def main():
     app.add_handler(page_handler)
     app.add_handler(qr_handler)
     app.add_handler(qr_photo_handler)
+    app.add_handler(eval_handler)
 
     logger.info("OuroSSS bot starting...")
     app.run_polling(allowed_updates=Update.ALL_TYPES)

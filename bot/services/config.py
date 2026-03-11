@@ -8,6 +8,8 @@ load_dotenv(ROOT / ".env")
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 BOT_TMUX_SESSION = os.getenv("BOT_TMUX_SESSION", "ouro")
 GH_BIN = os.getenv("GH_BIN", os.path.expanduser("~/.local/bin/gh"))
+NOTION_SECRET = os.getenv("NOTION_SECRET", "")
+NOTION_DB_ID = os.getenv("NOTION_DB_ID", "")
 
 # First run: send /start to bot, copy your user ID here
 AUTHORIZED_USERS: set[int] = set()
@@ -24,11 +26,11 @@ PROJECTS = {
         "conda": "kurkin_313_torch",
         "train_cmd": "bash train.sh",
     },
-    "long-vqa": {
+    "mmred": {
         "remote": "kurkin-1",
-        "path": "/workspace-SR004.nfs2/kurkin/long-vqa",
-        "local": str(Path.home() / "experiments" / "long-vqa"),
-        "tmux": "vqa",
+        "path": "/workspace-SR004.nfs2/kurkin/mmred",
+        "local": str(Path.home() / "experiments" / "mmred"),
+        "tmux": "mmred",
         "conda": "kurkin_313_torch",
         "train_cmd": "bash inference.sh",
     },

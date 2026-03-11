@@ -171,6 +171,33 @@ When the user sends `/feature <description>` via Telegram:
 
 **Concurrency**: if multiple terminals are alive, only one should claim the issue. First agent to comment "Picked up" owns it — others should skip.
 
+### Auto-Dev Agent (`scripts/auto-dev.sh`)
+A fully autonomous Claude Code agent that implements features without user interaction.
+
+```bash
+./scripts/auto-dev.sh           # pick up oldest auto-dev issue
+./scripts/auto-dev.sh 15        # implement specific issue #15
+./scripts/auto-dev.sh --watch   # poll every 60s for new issues
+```
+
+**Pre-approved permissions**: file read/write/edit, git operations, gh CLI, python, linting — no permission prompts.
+
+**Safeguards**:
+- `--max-turns 30` (override: `AUTO_DEV_MAX_TURNS=50`)
+- `--max-budget-usd 3.00` (override: `AUTO_DEV_MAX_BUDGET=10`)
+- Claims issue before starting (prevents duplicate work)
+- Comments on issue with results and commit hashes
+- Logs output to `/tmp/auto-dev-<N>.log`
+- Will NOT run training, destructive ops, or modify unrelated files
+
+**Watch mode**: `./scripts/auto-dev.sh --watch` runs in a tmux pane, polling for new `auto-dev` issues. When found, it claims and implements them. Ideal for overnight autonomous operation.
+
+**Recommended setup**: run in a dedicated tmux pane alongside the Telegram bot:
+```bash
+tmux new-session -d -s ouro './run_bot.sh'
+tmux split-window -t ouro './scripts/auto-dev.sh --watch'
+```
+
 ### Issue Triage Routine
 - **At conversation start**: check `gh issue list --repo Fr0do/ouroboros --state open` for new issues
 - **Periodically during long sessions**: re-check for newly filed issues (the `UserPromptSubmit` hook does this automatically)

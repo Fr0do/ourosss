@@ -1,8 +1,10 @@
 [tool.ruff]
 target-version = "py312"
 line-length = 120
+
+[tool.ruff.lint]
 select = ["E", "F", "W"]
 ignore = ["E402"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "bot/handlers/completions.py" = ["E501"]

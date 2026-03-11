@@ -1,7 +1,6 @@
 import subprocess
 import sys
 
-import pytest
 from PIL import Image
 
 

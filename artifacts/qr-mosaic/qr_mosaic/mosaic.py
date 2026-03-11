@@ -1,7 +1,7 @@
 from typing import Tuple
 
 import numpy as np
-from PIL import Image, ImageEnhance, ImageFilter
+from PIL import Image
 
 from .generator import QRGenerator
 
@@ -103,7 +103,6 @@ class MosaicBlender:
         dark_color, light_color = self._extract_dominant_pair(bg)
 
         qr_gray = np.array(qr.convert("L"))
-        size = qr.size[0]
 
         # Build a color-mapped QR using the dominant palette.
         dark = np.array(dark_color, dtype=np.uint8)

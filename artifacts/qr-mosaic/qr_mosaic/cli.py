@@ -1,5 +1,4 @@
 import argparse
-import sys
 
 from .generator import QRGenerator
 from .mosaic import MosaicBlender, STYLES

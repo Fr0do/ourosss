@@ -32,8 +32,12 @@
 - **Dataset v3**: adjacency list format, 3–6 nodes, single-letter names, forced 2+ hops
 - **Trainer v2**: strong conciseness rewards (+0.3 <200chars, −0.3 >1000), max_completion_length=512
 - **Completions**: saved as parquets in `spectral-r1-checkpoints/fixed/completions/`
+- **Baseline benchmark**: `serve_baselines.sh` (vLLM OpenAI server, 10 models) + `benchmark_graph.py` (async eval suite)
+- **Baseline models**: LFM2 x2, Qwen3 (0.6B, 1.7B), Qwen3.5 (0.8B, 4B), PleIAs Baguettotron+Monad, Gemma3 (1B, 4B)
+- **Eval datasets**: JSONPathfinder (own), NLGraph (Wang et al. 2023), Reasoning-Gym
+- **Paper**: 4 new bib entries (graph reasoning benchmarks), related work paragraph added
 
-| **long-vqa** | `~/experiments/long-vqa` + `kurkin-1:/workspace-SR004.nfs2/kurkin/long-vqa` | MMReD: cross-modal dense context reasoning benchmark. MERA integration. | Benchmark complete, eval ongoing |
+| **mmred** | `~/experiments/mmred` + `kurkin-1:/workspace-SR004.nfs2/kurkin/mmred` | MMReD: cross-modal dense context reasoning benchmark. MERA integration. | Benchmark complete, eval ongoing |
 | **bbbo** | `kurkin-1:/workspace-SR004.nfs2/kurkin/bbbo/GeneralOptimizer` | Bayesian black-box optimization framework | Active development |
 | **ouroboros** | `~/experiments/ouroboros` | This meta-project: governance, Telegram bot, CI/CD | Bootstrapping |
 
@@ -117,8 +121,8 @@ When Claude Code runs autonomously on a project:
 
 ### 4. Cross-Project Syncing
 - s_cot training results → s_cot_tex paper (via scp or git)
-- long-vqa eval metrics → s_cot paper (comparison baselines)
-- bbbo optimizer → potential hyperparameter backend for s_cot/long-vqa
+- mmred eval metrics → s_cot paper (comparison baselines)
+- bbbo optimizer → potential hyperparameter backend for s_cot/mmred
 ### 5. Paper Pipeline
 1. Experiments run on remotes (kurkin-1/4)
 2. Results sync to local `~/experiments/<project>_tex/`

@@ -79,7 +79,7 @@ Auto-dev agent: `./scripts/auto-dev.sh [--watch|N]` — headless Claude with pre
 ---
 
 ## Version
-- v6.31.0 — 2026-03-11 — Notion eval tracking, s_cot website page, cost optimization
+- v6.30.1 — 2026-03-11 — Notion eval tracking, s_cot website page, cost optimization
 - v6.30.0 — 2026-03-10 — GitHub Pages, /page command, auto-vitals
 - v6.29.0 — 2026-03-09 — /completions baseline, /feature, /vitals, issue journaling
 - v6.28.4 — 2026-03-09 — Deep research (22 refs), curriculum dataset, RCD refactor

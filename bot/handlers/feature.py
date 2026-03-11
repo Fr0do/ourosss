@@ -32,7 +32,8 @@ def _make_body(description: str) -> str:
         f"## Motivation\n\n"
         f"{description}\n\n"
         f"## Status\n\n"
-        f"Filed via Telegram /feature command"
+        f"Filed via Telegram /feature command.\n"
+        f"Label: `auto-dev` — awaiting pickup by a terminal agent."
     )
 
 
@@ -58,6 +59,7 @@ async def feature_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "--repo", REPO,
             "--title", title,
             "--body", body,
+            "--label", "auto-dev",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )

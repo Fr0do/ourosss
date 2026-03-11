@@ -153,11 +153,30 @@ Ouroboros (root page)
 - Trivial fixes (typos, one-liners) skip the issue — use judgment
 - Issue title: short and descriptive. Body: context, motivation, acceptance criteria when relevant
 
+### Feature Dispatch (Telegram → Terminal Agent)
+When the user sends `/feature <description>` via Telegram:
+1. The bot creates a GitHub issue with the `auto-dev` label
+2. A `UserPromptSubmit` hook (`.claude/hooks/check-auto-dev.sh`) runs on every user message in any terminal agent
+3. The hook checks `gh issue list --label auto-dev --state open` and injects context if issues exist
+4. The terminal agent sees the pending issue, reads it, implements it, commits with `fixes #N`
+5. After implementation, remove the `auto-dev` label (auto-removed when issue closes via `fixes #N`)
+
+**Agent responsibilities when picking up an auto-dev issue:**
+- Read the full issue body with `gh issue view <N>`
+- Comment on the issue acknowledging pickup: "Picked up by terminal agent. Starting implementation."
+- Implement the feature following all project conventions (atomic commits, issue references)
+- Comment with progress, commit hashes, any blockers
+- Close via `fixes #N` in the commit message
+- If the task is too large or unclear, comment asking for clarification instead of guessing
+
+**Concurrency**: if multiple terminals are alive, only one should claim the issue. First agent to comment "Picked up" owns it — others should skip.
+
 ### Issue Triage Routine
 - **At conversation start**: check `gh issue list --repo Fr0do/ouroboros --state open` for new issues
-- **Periodically during long sessions**: re-check for newly filed issues
+- **Periodically during long sessions**: re-check for newly filed issues (the `UserPromptSubmit` hook does this automatically)
 - Triage: read the issue, assess priority, either act on it or acknowledge and plan
 - If an issue is filed by the user while working — treat it as a task interrupt
+- Issues labeled `auto-dev` have highest priority — implement immediately
 
 ### Git Workflow
 - **Default: commit & push** for routine changes — no confirmation needed

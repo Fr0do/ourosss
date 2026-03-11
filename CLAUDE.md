@@ -36,6 +36,13 @@ Active via Claude Code hook. All shell ops auto-optimized.
 - **Reference in commits**: `fixes #N` to auto-close, or mention `#N` if work continues
 - **Triage at session start**: check `gh issue list --repo Fr0do/ouroboros --state open`
 
+## Feature Dispatch (auto-dev)
+- A `UserPromptSubmit` hook (`.claude/hooks/check-auto-dev.sh`) checks for `auto-dev` labeled issues
+- If you see "AUTO-DEV" in hook output, pick up the issue immediately
+- Comment "Picked up" on the issue to claim it (prevents other agents from duplicating work)
+- Implement, commit with `fixes #N`, the label is removed when the issue closes
+- See OUROBOROS.md "Feature Dispatch" for full protocol
+
 ## Commit Conventions
 - Prefix: `[feat]`, `[fix]`, `[doc]`, `[infra]`, `[bot]`, `[s_cot]`
 - Include a summary of major edits in commit messages (not just what changed in this repo)

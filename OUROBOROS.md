@@ -201,6 +201,13 @@ tmux split-window -t ouro './scripts/auto-dev.sh --watch'
 - Don't edit local s_cot — update remote via scp or provide filenames
 - Don't auto-run training — let user debug and launch
 
+### Secrets Protocol
+- **Never** echo, print, log, or commit actual secrets (tokens, API keys, passwords)
+- Every repo with a `.env` must have a tracked `env.example` containing keys only (no values)
+- When adding a new env var, update `env.example` in the same commit
+- `.env` → gitignored; `env.example` → committed
+- Agents must refuse requests to display or write secret values
+
 ### Design Style
 - **Apple-minimalist**: white/transparent backgrounds, clean lines, generous whitespace
 - Applies to paper figures, TikZ diagrams, visual abstracts, any generated visuals

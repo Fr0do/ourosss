@@ -42,6 +42,12 @@ Active via Claude Code hook. All shell ops auto-optimized.
 - Implement, commit with `fixes #N`, the label is removed when the issue closes
 - See OUROBOROS.md "Feature Dispatch" for full protocol
 
+## Secrets & env.example
+- **Never** echo, print, or write actual secrets (tokens, keys, passwords) to files, terminal, or commits
+- Every repo that uses `.env` must have an `env.example` with keys only (no values), committed to git
+- When adding a new env var: update `env.example` in the same commit
+- `.env` is always gitignored; `env.example` is always tracked
+
 ## Commit Conventions
 - Prefix: `[feat]`, `[fix]`, `[doc]`, `[infra]`, `[bot]`, `[s_cot]`
 - Include a summary of major edits in commit messages (not just what changed in this repo)

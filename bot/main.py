@@ -40,8 +40,8 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = update.effective_user.id
     projects_list = ", ".join(PROJECTS.keys())
     await update.message.reply_text(
-        f"*OuroSSS* | Claude Research Agent\n"
-        f"User: `{uid}` | Projects: {projects_list}\n\n"
+        f"*OuroSSS* \\| Claude Research Agent\n"
+        f"User: `{uid}` \\| Projects: {projects_list}\n\n"
         f"*Training*\n"
         f"/status — project states + GPU\n"
         f"/run _project_ \\[cmd] — execute in tmux\n"

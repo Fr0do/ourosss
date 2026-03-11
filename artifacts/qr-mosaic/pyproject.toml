@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "qr-mosaic"
+version = "0.1.0"
+description = "QR code generator with image mosaic blending"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Maxim Kurkin", email = "maximbider@gmail.com"}]
+
+dependencies = [
+    "qrcode[pil]>=7.4",
+    "Pillow>=10.0",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+telegram = ["python-telegram-bot>=20.0"]
+dev = ["pytest>=7.0", "pytest-asyncio>=0.21"]
+all = ["qr-mosaic[telegram,dev]"]
+
+[project.scripts]
+qr-mosaic = "qr_mosaic.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.setuptools.packages.find]
+include = ["qr_mosaic*"]

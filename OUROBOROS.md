@@ -60,6 +60,23 @@ Rule: artifact + paper + code released atomically. A result without reproducible
 
 ---
 
+## Issue & Reporting Protocol
+
+**Issue routing:**
+- Infrastructure issues (bot, CI, tooling, governance) → `Fr0do/ouroboros`
+- Research issues (training, experiments, paper, eval) → project repo (`Fr0do/s_cot`, `Fr0do/mmred`, etc.)
+- Rule: file the issue where the code lives.
+
+**Notion sync:**
+- Collaborator-facing updates → Notion Research Log: findings, milestones, experiment results, paper status
+- Implementation details → GitHub issues: bugs, config changes, pipeline tasks
+- Rule: if a collaborator would care about it, it goes to Notion. If only you need to track it, it's a GitHub issue.
+
+**Visibility:**
+- Public website only reflects public repos. Private research stays invisible until the repo goes public.
+
+---
+
 *Project registry and infrastructure: [PROJECTS.md](PROJECTS.md)*
 *Version history: [CHANGELOG.md](CHANGELOG.md)*
 *Development conventions: [CLAUDE.md](CLAUDE.md)*

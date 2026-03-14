@@ -43,6 +43,11 @@ Native agent teams (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`): lead + 3-5 teamma
 3. Commit working state before experiments
 4. Report completion/blockers to Telegram
 
+### Issue Routing
+- Infra issues: `gh issue create --repo Fr0do/ouroboros`
+- Research issues: `gh issue create --repo Fr0do/<project>` (s_cot, mmred, bbbo)
+- Collaborator updates: `/research log` via Telegram bot → Notion
+
 ### Feature Dispatch
 `/feature <desc>` via Telegram → GitHub issue with `auto-dev` label → hook injects into terminal agent → agent claims, implements, commits `fixes #N`. First to comment "Picked up" owns it.
 

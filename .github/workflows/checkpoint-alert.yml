@@ -1,0 +1,58 @@
+name: Checkpoint Alert
+
+on:
+  schedule:
+    - cron: "0 */4 * * *"  # every 4 hours
+  workflow_dispatch:
+    inputs:
+      project:
+        description: "Project to scan (s_cot, bbbo, or 'all')"
+        required: false
+        default: all
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan for new checkpoints
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: TELEGRAM_TOKEN,TELEGRAM_CHAT_ID,PROJECT_FILTER
+          script: |
+            BASE="/workspace-SR004.nfs2/kurkin"
+            declare -A DIRS=(
+              [s_cot]="${BASE}/s_cot/spectral-r1-checkpoints"
+              [bbbo]="${BASE}/bbbo/GeneralOptimizer/checkpoints"
+            )
+
+            send_tg() {
+              curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
+                -d chat_id="${TELEGRAM_CHAT_ID}" \
+                -d text="$1" -d parse_mode="Markdown" > /dev/null
+            }
+
+            FOUND=""
+            for PROJECT in "${!DIRS[@]}"; do
+              [ "$PROJECT_FILTER" != "all" ] && [ "$PROJECT_FILTER" != "$PROJECT" ] && continue
+              DIR="${DIRS[$PROJECT]}"
+              [ -d "$DIR" ] || continue
+
+              # Find checkpoint dirs modified in last 4 hours
+              while IFS= read -r CKPT; do
+                STEP=$(basename "$CKPT")
+                SIZE=$(du -sh "$CKPT" 2>/dev/null | cut -f1 || echo "?")
+                FOUND="${FOUND}\n  \`${PROJECT}/${STEP}\` — ${SIZE}"
+              done < <(find "$DIR" -maxdepth 1 -type d -name "checkpoint-*" -mmin -240 2>/dev/null)
+            done
+
+            if [ -n "$FOUND" ]; then
+              send_tg "💾 *New checkpoints (last 4h):*$(echo -e "$FOUND")"
+            fi
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          PROJECT_FILTER: ${{ github.event.inputs.project || 'all' }}

@@ -1,0 +1,53 @@
+name: Pipeline Stage
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number (for manual test)
+        required: false
+        default: "0"
+
+jobs:
+  notify:
+    # Only fire on stage:N labels
+    if: startsWith(github.event.label.name, 'stage:')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send stage notification
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          LABEL="${{ github.event.label.name }}"
+          STAGE="${LABEL#stage:}"
+          ISSUE_NUM="${{ github.event.issue.number }}"
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          ISSUE_URL="${{ github.event.issue.html_url }}"
+
+          # Stage name and key tools lookup
+          case "$STAGE" in
+            0) NAME="Ideation";       TOOLS="/deep-research, gh issue, Notion" ;;
+            1) NAME="Bootstrap";      TOOLS="/deep-research (LaTeX), /feature, PROJECTS.md" ;;
+            2) NAME="Infrastructure"; TOOLS="Sonnet subagent, accelerate, ClearML init" ;;
+            3) NAME="Training";       TOOLS="/run, /logs, /gpu, /ckpt, /completions" ;;
+            4) NAME="Results";        TOOLS="/metrics, /eval, /completions, /research-log" ;;
+            5) NAME="Paper";          TOOLS="/deep-research, Sonnet subagent, LaTeX repo" ;;
+            6) NAME="Release";        TOOLS="gh release, /feature, /sync, /page" ;;
+            *) NAME="Unknown";        TOOLS="—" ;;
+          esac
+
+          MSG="📋 *Pipeline: Stage ${STAGE} — ${NAME}*
+
+          Issue #${ISSUE_NUM}: ${ISSUE_TITLE}
+          Key tools: ${TOOLS}
+
+          [View issue](${ISSUE_URL})"
+
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            -d text="${MSG}" \
+            -d parse_mode="Markdown" \
+            -d disable_web_page_preview="true"

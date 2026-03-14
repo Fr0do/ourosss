@@ -153,7 +153,7 @@ def push_research_log(
         "Summary": {"rich_text": [{"text": {"content": summary}}]},
         "Metrics": {"rich_text": [{"text": {"content": metrics}}] if metrics else []},
         "Date": {"date": {"start": datetime.now(timezone.utc).strftime("%Y-%m-%d")}},
-        "Status": {"select": {"name": status}},
+        "Status": {"status": {"name": status}},
     }
 
     page = client.pages.create(
@@ -194,7 +194,7 @@ def get_research_log(project: str | None = None, limit: int = 10) -> list[dict]:
             "summary": _get_rich_text(props.get("Summary", {})),
             "metrics": _get_rich_text(props.get("Metrics", {})),
             "date": _get_date(props.get("Date", {})),
-            "status": _get_select(props.get("Status", {})),
+            "status": _get_status(props.get("Status", {})),
         })
     return results
 
@@ -231,6 +231,11 @@ def _get_select(prop: dict) -> str:
 def _get_rich_text(prop: dict) -> str:
     rt_list = prop.get("rich_text", [])
     return rt_list[0]["text"]["content"] if rt_list else ""
+
+
+def _get_status(prop: dict) -> str:
+    status = prop.get("status")
+    return status["name"] if status else ""
 
 
 def _get_date(prop: dict) -> str:

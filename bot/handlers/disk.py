@@ -4,7 +4,8 @@ from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler, JobQueue
 from ..services.disk_state import (
     refresh_df, refresh_dua, refresh_my_usage,
-    format_report, format_my_report, WARN_PERCENT,
+    format_report, format_my_report, WARN_FREE_TB, parse_size_tb,
+    _trend_line,
 )
 
 logger = logging.getLogger("ouroboros")
@@ -47,30 +48,42 @@ async def disk_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def _disk_watchdog(context: ContextTypes.DEFAULT_TYPE):
-    """Hourly: refresh df, run dua if critical, alert if bad."""
+    """Every 6h: refresh df and alert if free space < WARN_FREE_TB."""
     try:
         state = await refresh_df()
     except Exception as e:
         logger.error(f"Disk watchdog df failed: {e}")
         return
 
-    pct = state.get("percent")
-    if pct is None:
+    avail = state.get("avail")
+    if avail is None:
         return
 
-    # Auto-refresh dua breakdown when critical
-    if pct >= WARN_PERCENT:
-        try:
-            state = await refresh_dua(top_n=20)
-        except Exception as e:
-            logger.error(f"Disk watchdog dua failed: {e}")
-
-    if pct < WARN_PERCENT:
+    free_tb = parse_size_tb(avail)
+    if free_tb >= WARN_FREE_TB:
         return
 
-    report = format_report(state)
+    pct = state.get("percent", "?")
+    used = state.get("used", "?")
+    total = state.get("total", "?")
+    trend = _trend_line(state)
+    trend_part = f"\n{trend}" if trend else ""
+
+    if free_tb < 0.5:
+        emoji = "🔴"
+        level = "CRITICAL"
+    else:
+        emoji = "🟡"
+        level = "WARNING"
+
+    msg = (
+        f"{emoji} *Disk {level}* — only {avail} free\n"
+        f"{used} used / {total} total ({pct}% full)"
+        f"{trend_part}"
+    )
+
     chat_id = context.job.data
-    await context.bot.send_message(chat_id=chat_id, text=report, parse_mode="Markdown")
+    await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode="Markdown")
 
 
 def schedule_watchdog(job_queue: JobQueue | None, chat_id: int):

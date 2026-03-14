@@ -15,7 +15,34 @@ STATE_FILE = Path(__file__).resolve().parent.parent.parent / ".disk_state.json"
 
 WARN_PERCENT = 90
 CRIT_PERCENT = 95
+WARN_FREE_TB = 1.5  # alert threshold: free space below this (TB)
 HISTORY_MAX = 48  # keep ~2 days of hourly samples
+
+
+def parse_size_tb(s: str) -> float:
+    """Convert human-readable size string to TB. '3.9T' → 3.9, '800G' → 0.8, '500M' → 0.0005."""
+    s = s.strip()
+    if not s:
+        return 0.0
+    unit = s[-1].upper()
+    try:
+        value = float(s[:-1])
+    except ValueError:
+        return 0.0
+    if unit == "T":
+        return value
+    elif unit == "G":
+        return value / 1024
+    elif unit == "M":
+        return value / 1024 / 1024
+    elif unit == "K":
+        return value / 1024 / 1024 / 1024
+    else:
+        # no unit suffix — assume bytes
+        try:
+            return float(s) / 1024 ** 4
+        except ValueError:
+            return 0.0
 
 
 def _parse_dua_output(output: str) -> list[dict] | None:
@@ -83,11 +110,19 @@ async def refresh_dua(top_n: int = 20) -> dict:
     )
 
     state = load_state()
+
+    # Detect timeout or empty output without corrupting state
+    if not output or "TIMEOUT" in output:
+        state["dua_error"] = f"scan timed out or produced no output ({time.strftime('%Y-%m-%d %H:%M')})"
+        save_state(state)
+        return state
+
     state["dua_updated"] = time.strftime("%Y-%m-%d %H:%M")
 
     entries = _parse_dua_output(output)
     if entries is not None:
         state["top_dirs"] = entries
+        state.pop("dua_error", None)
     else:
         state["dua_error"] = output or "empty"
 

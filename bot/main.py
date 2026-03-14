@@ -16,7 +16,6 @@ from .handlers.sync import handler as sync_handler
 from .handlers.metrics import handler as metrics_handler
 from .handlers.completions import handler as completions_handler
 from .handlers.crashlog import handler as crashlog_handler
-from .handlers.team import handler as team_handler
 from .handlers.vitals import handler as vitals_handler
 from .handlers.feature import handler as feature_handler
 from .handlers.page import handler as page_handler
@@ -44,8 +43,8 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"*OuroSSS* \\| Claude Research Agent\n"
         f"User: `{uid}` \\| Projects: {projects_list}\n\n"
-        f"*Training*\n"
-        f"/status — project states + GPU\n"
+        f"*Training \\& Monitoring*\n"
+        f"/status — project states \\+ GPU\n"
         f"/run _project_ \\[cmd] — execute in tmux\n"
         f"/stop _project_ — send Ctrl\\-C\n"
         f"/logs _project_ \\[n] — tail output\n"
@@ -56,39 +55,32 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"/completions _project_ baseline — full analysis report\n"
         f"/completions _project_ traces \\[N] — full traces\n"
         f"/completions _project_ step _IDX_ — python index/slice\n"
-        f"  _e\\.g\\. 0, \\-1, \\-3:, 0:5, ::2_\n\n"
-        f"*Infrastructure*\n"
-        f"/gpu — nvidia\\-smi all remotes\n"
-        f"/disk — NFS usage \\(cached, hourly alert\\)\n"
-        f"/disk scan — full dua rescan\n"
-        f"/disk me — your directory breakdown\n"
-        f"/sync _project_ \\[subpath] — rsync to local\n\n"
-        f"*Team*\n"
-        f"/team — task queue overview\n"
-        f"/team _id_ — task details\n"
-        f"/team reset _id_ — reset stuck task\n\n"
-        f"*Health*\n"
-        f"/vitals — project health dashboard \\(chart\\)\n"
-        f"/vitals text — text\\-only summary\n\n"
-        f"*Artifacts*\n"
-        f"/qr _text_ — generate a QR code\n"
-        f"  _photo\\+caption_ — QR mosaic blend\n\n"
-        f"*Development*\n"
-        f"/feature _description_ — file GitHub issue from chat\n"
-        f"/page — update project page with current vitals\n"
-        f"/page _text_ — add status entry to timeline\n"
-        f"/page finding _title_ \\| _body_ — tagged entry\n\n"
-        f"*Eval Tracking*\n"
+        f"  _e\\.g\\. 0, \\-1, \\-3:, 0:5, ::2_\n"
+        f"/gpu — nvidia\\-smi all remotes\n\n"
+        f"*Research*\n"
+        f"/research log _project type title_ \\| _summary_ \\[\\| _metrics_] — log entry\n"
+        f"/research list \\[project] \\[limit] — recent entries\n"
+        f"/research sync — sync status\n"
         f"/eval push _ckpt step bench topo acc fmt len_ — push to Notion\n"
         f"/eval list \\[limit] — recent eval results\n"
         f"/eval summary — latest per benchmark\n\n"
-        f"*Research Log*\n"
-        f"/research log _project type title_ \\| _summary_ \\[\\| _metrics_] — log entry\n"
-        f"/research list \\[project] \\[limit] — recent entries\n"
-        f"/research sync — sync status\n\n"
+        f"*Infrastructure*\n"
+        f"/disk — NFS usage \\(cached, alert at \\<1\\.5T free\\)\n"
+        f"/disk scan — full dua rescan\n"
+        f"/disk me — your directory breakdown\n"
+        f"/sync _project_ \\[subpath] — rsync to local\n"
+        f"/vitals — project health dashboard \\(chart\\)\n"
+        f"/vitals text — text\\-only summary\n\n"
+        f"*Artifacts*\n"
+        f"/feature _description_ — file GitHub issue from chat\n"
+        f"/page — update project page with current vitals\n"
+        f"/page _text_ — add status entry to timeline\n"
+        f"/page finding _title_ \\| _body_ — tagged entry\n"
+        f"/qr _text_ — generate a QR code\n"
+        f"  _photo\\+caption_ — QR mosaic blend\n\n"
         f"*System*\n"
-        f"/crashlog _project_ — dump tmux scrollback on crash\n"
         f"/update — git pull \\+ restart\n"
+        f"/crashlog _project_ — dump tmux scrollback on crash\n"
         f"/help — this message",
         parse_mode="MarkdownV2",
     )
@@ -122,21 +114,20 @@ async def post_init(app: Application):
         BotCommand("run", "Run command on project"),
         BotCommand("stop", "Stop project (Ctrl-C)"),
         BotCommand("logs", "Tail tmux logs"),
-        BotCommand("gpu", "GPU utilization"),
-        BotCommand("update", "Git pull + restart"),
-        BotCommand("ckpt", "List checkpoints"),
-        BotCommand("disk", "Workspace disk usage"),
-        BotCommand("sync", "Rsync results to local"),
         BotCommand("metrics", "Training metrics summary"),
+        BotCommand("ckpt", "List checkpoints"),
         BotCommand("completions", "Analyse GRPO completions"),
-        BotCommand("crashlog", "Dump tmux scrollback for debugging"),
-        BotCommand("team", "Multi-agent task queue"),
+        BotCommand("gpu", "GPU utilization"),
+        BotCommand("research", "Research log (Notion)"),
+        BotCommand("eval", "Eval tracking (Notion)"),
+        BotCommand("disk", "NFS usage (alert at <1.5T free)"),
+        BotCommand("sync", "Rsync results to local"),
         BotCommand("vitals", "Project health dashboard"),
-        BotCommand("qr", "Generate QR code / mosaic"),
         BotCommand("feature", "File a feature request"),
         BotCommand("page", "Update project page"),
-        BotCommand("eval", "Eval tracking (Notion)"),
-        BotCommand("research", "Research log (Notion)"),
+        BotCommand("qr", "Generate QR code / mosaic"),
+        BotCommand("update", "Git pull + restart"),
+        BotCommand("crashlog", "Dump tmux scrollback for debugging"),
     ])
 
 
@@ -169,7 +160,6 @@ def main():
     app.add_handler(metrics_handler)
     app.add_handler(completions_handler)
     app.add_handler(crashlog_handler)
-    app.add_handler(team_handler)
     app.add_handler(vitals_handler)
     app.add_handler(feature_handler)
     app.add_handler(page_handler)

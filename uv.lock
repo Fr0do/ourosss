@@ -461,7 +461,7 @@ wheels = [
 
 [[package]]
 name = "ouroboros"
-version = "6.32.0"
+version = "7.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "matplotlib" },

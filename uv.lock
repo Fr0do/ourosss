@@ -479,7 +479,7 @@ dev = [
     { name = "pre-commit" },
     { name = "ruff" },
 ]
-scripts = [
+telegram = [
     { name = "telethon" },
 ]
 
@@ -500,7 +500,7 @@ dev = [
     { name = "pre-commit", specifier = ">=3.0" },
     { name = "ruff", specifier = ">=0.9" },
 ]
-scripts = [{ name = "telethon", specifier = ">=1.36" }]
+telegram = [{ name = "telethon", specifier = ">=1.36" }]
 
 [[package]]
 name = "packaging"

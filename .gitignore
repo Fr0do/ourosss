@@ -11,6 +11,6 @@ bot.log
 *.session-journal
 
 # Telegram organizer — personal configs and one-off migration scripts
-scripts/folders.yaml
-scripts/tg-folder-cleanup.py
-scripts/tg-folder-migrate.py
+scripts/telegram/folders.yaml
+scripts/telegram/folder-cleanup.py
+scripts/telegram/folder-migrate.py

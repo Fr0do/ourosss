@@ -15,7 +15,7 @@ Delegation is mandatory, not optional.
 **Hard rule**: before writing >20 lines of code yourself, launch a Sonnet `Agent` subagent. No exceptions. Opus writes plans and reviews; Sonnet writes code.
 
 ## Environment
-- Secrets in `.env` (gitignored). `env.example` tracked — update both together.
+- Secrets in `.env` (gitignored). `.env.example` tracked — update both together.
 - Deps: `uv sync --locked` to install. `uv lock` after changing deps. `uv run ouroboros` to start bot.
 
 ## Key Files

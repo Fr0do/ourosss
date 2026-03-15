@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="claude-research-logo.svg" width="200" alt="Ouroboros">
+  <img src="assets/claude-research-logo.svg" width="200" alt="Ouroboros">
 </p>
 
 <h1 align="center">Ouroboros</h1>
@@ -28,8 +28,8 @@ Ouroboros is a coordination layer for autonomous research across multiple projec
 
 ```bash
 cp .env.example .env   # fill in TELEGRAM_TOKEN, AUTHORIZED_USERS
-pip install python-telegram-bot python-dotenv
-./run_bot.sh
+uv sync --locked
+uv run ouroboros
 ```
 
 ## Coordination

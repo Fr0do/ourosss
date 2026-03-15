@@ -474,10 +474,13 @@ dependencies = [
     { name = "telethon" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "pre-commit" },
     { name = "ruff" },
+]
+scripts = [
+    { name = "telethon" },
 ]
 
 [package.metadata]
@@ -486,13 +489,18 @@ requires-dist = [
     { name = "notion-client", specifier = ">=2.0" },
     { name = "pandas", specifier = ">=2.0" },
     { name = "pillow", specifier = ">=10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.0" },
     { name = "python-dotenv", specifier = ">=1.0" },
     { name = "python-telegram-bot", extras = ["job-queue"], specifier = ">=21.0" },
     { name = "pyyaml", specifier = ">=6.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9" },
     { name = "telethon", specifier = ">=1.36" },
 ]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pre-commit", specifier = ">=3.0" },
+    { name = "ruff", specifier = ">=0.9" },
+]
+scripts = [{ name = "telethon", specifier = ">=1.36" }]
 
 [[package]]
 name = "packaging"

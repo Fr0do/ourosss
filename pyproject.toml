@@ -8,15 +8,20 @@ dependencies = [
     "python-dotenv>=1.0",
     "notion-client>=2.0",
     "Pillow>=10.0",
-    # qr-mosaic is a local package — install manually: pip install artifacts/qr-mosaic
     "Telethon>=1.36",
     "matplotlib>=3.8",
     "pandas>=2.0",
     "pyyaml>=6.0",
 ]
 
-[project.optional-dependencies]
+# Entry point: `uv run ouroboros` starts the bot
+[project.scripts]
+ouroboros = "bot.main:main"
+
+# PEP 735 dependency groups (uv-native, replaces optional-dependencies)
+[dependency-groups]
 dev = ["pre-commit>=3.0", "ruff>=0.9"]
+scripts = ["telethon>=1.36"]
 
 [build-system]
 requires = ["hatchling"]
@@ -24,6 +29,12 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["bot"]
+
+[tool.uv]
+# Compile bytecode for faster startup
+compile-bytecode = true
+# Default groups to install with `uv sync`
+default-groups = ["dev"]
 
 [tool.ruff]
 target-version = "py312"

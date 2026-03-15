@@ -17,8 +17,7 @@ Root governance for Max's research. Bot (`bot/`), governance protocol (`OUROBORO
 ## Environment
 - macOS → SSH to kurkin-1, kurkin-4 (shared NFS: `/workspace-SR004.nfs2/kurkin/`)
 - Secrets in `.env` (gitignored). `env.example` tracked — update both together.
-- Deps managed via `uv` + `pyproject.toml`. Lock: `uv.lock` (tracked). Run `uv lock` after changing deps.
-- Install: `uv pip install -e ".[dev]"` (into any Python ≥3.12 env)
+- Deps: `uv sync --locked` to install. `uv lock` after changing deps. `uv run ouroboros` to start bot.
 
 ## Key Files
 | File | Purpose |

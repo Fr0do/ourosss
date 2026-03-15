@@ -1,34 +1,20 @@
 name: RTK Badge
 
+# Badge JSON is updated locally via `rtk gain` and committed.
+# Shields.io reads it directly from the repo raw URL:
+# https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Fr0do/ouroboros/main/.github/rtk-badge.json
+
 on:
   push:
     paths:
       - '.github/rtk-badge.json'
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
-  badge:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Read badge data
-        id: badge
-        run: |
-          MSG=$(jq -r '.message' .github/rtk-badge.json)
-          COLOR=$(jq -r '.color' .github/rtk-badge.json)
-          echo "message=$MSG" >> "$GITHUB_OUTPUT"
-          echo "color=$COLOR" >> "$GITHUB_OUTPUT"
-
-      - name: Create badge
-        uses: schneegans/dynamic-badges-action@v1.7.0
-        with:
-          auth: ${{ secrets.GIST_TOKEN }}
-          gistID: ${{ vars.RTK_BADGE_GIST_ID }}
-          filename: rtk-savings.json
-          label: RTK savings
-          message: ${{ steps.badge.outputs.message }}
-          color: ${{ steps.badge.outputs.color }}
+      - name: Validate badge JSON
+        run: jq -e '.message and .color' .github/rtk-badge.json

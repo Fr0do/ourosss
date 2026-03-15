@@ -74,7 +74,7 @@ async def _push(update: Update, args: list[str]):
     if len(args) < 7:
         await update.message.reply_text(
             "Need at least 7 args: checkpoint step benchmark topology accuracy valid_fmt avg_len\n"
-            f"Example: `/eval push checkpoint-500 500 json_pathfinder mixed 0.85 0.95 180`",
+            "Example: `/eval push checkpoint-500 500 json_pathfinder mixed 0.85 0.95 180`",
             parse_mode="Markdown",
         )
         return

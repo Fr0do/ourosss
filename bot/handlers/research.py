@@ -18,7 +18,6 @@ from ..services.notion import (
     format_research_log,
     RESEARCH_PROJECTS,
     RESEARCH_TYPES,
-    RESEARCH_STATUSES,
 )
 from ..services.config import NOTION_SECRET, NOTION_RESEARCH_DB_ID
 

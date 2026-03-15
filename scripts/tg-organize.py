@@ -211,7 +211,7 @@ def print_audit(data: dict):
                 print(f"         flags: {', '.join(flags_on)}")
 
     if dead:
-        print(f"\n  Dead chats (>90 days, candidates for archive):")
+        print("\n  Dead chats (>90 days, candidates for archive):")
         for c in sorted(dead, key=lambda x: -x["days_inactive"])[:20]:
             print(f"    {c['days_inactive']:>4}d  {c['title']} ({c['type']})")
         if len(dead) > 20:

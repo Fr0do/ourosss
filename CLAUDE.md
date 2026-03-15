@@ -4,7 +4,7 @@
 Root governance for Max's research. Bot (`bot/`), governance protocol (`OUROBOROS.md`).
 
 ## Cost Discipline
-**Budget: $20/day.** Opus was 98% of $108 over 4 days. Delegation is mandatory, not optional.
+Delegation is mandatory, not optional.
 
 | Task type | Model | Examples |
 |---|---|---|
@@ -15,18 +15,16 @@ Root governance for Max's research. Bot (`bot/`), governance protocol (`OUROBORO
 **Hard rule**: before writing >20 lines of code yourself, launch a Sonnet `Agent` subagent. No exceptions. Opus writes plans and reviews; Sonnet writes code.
 
 ## Environment
-- macOS → SSH to kurkin-1, kurkin-4 (shared NFS: `/workspace-SR004.nfs2/kurkin/`)
 - Secrets in `.env` (gitignored). `env.example` tracked — update both together.
 - Deps: `uv sync --locked` to install. `uv lock` after changing deps. `uv run ouroboros` to start bot.
 
 ## Key Files
 | File | Purpose |
 |---|---|
-| OUROBOROS.md | Research philosophy and principles |
-| PROJECTS.md | Project registry, infrastructure, workflow |
+| OUROBOROS.md | Research pipeline protocol |
+| PROJECTS.md | Workflow and issue routing |
 | CHANGELOG.md | Version history |
-| bot/main.py | Telegram bot entry (18 handlers) |
-| bot/services/tg.py | Shared helpers (send_long, @authorized, require_project) |
+| bot/main.py | Telegram bot entry |
 | scripts/auto-dev.sh | Autonomous agent for `auto-dev` labeled issues |
 
 ## Issue Journaling
@@ -41,12 +39,7 @@ If you see `[AUTO-DEV DISPATCH]` → claim it ("Picked up"), implement, commit w
 ## Git
 - Linear history (rebase, not merge). Commit & push by default.
 - Prefix: `[feat]`, `[fix]`, `[doc]`, `[infra]`, `[bot]`, `[s_cot]`
-- Commit body: bullet list of all significant changes including remote/subproject work
-
-## Subprojects
-- s_cot → `~/experiments/s_cot_tex` + `kurkin-1:.../s_cot` (don't edit local — use scp)
-- mmred → `~/experiments/mmred` + `kurkin-1:.../mmred`
-- bbbo → `kurkin-1:.../bbbo/GeneralOptimizer`
+- Commit body: bullet list of all significant changes
 
 ## Design Style
 Apple-minimalist. White backgrounds, clean lines, generous whitespace. No dark themes for print.

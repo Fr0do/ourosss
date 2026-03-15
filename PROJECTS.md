@@ -8,7 +8,7 @@ See Notion Research HQ for project details, infrastructure setup, and current st
 Telegram bot (`/status`, `/run`, `/stop`, `/logs`) or Claude Code CLI directly.
 
 ### Issue Routing
-- Infra issues: `gh issue create --repo Fr0do/ouroboros`
+- Infra issues: `gh issue create --repo Fr0do/ourosss`
 - Research issues: `gh issue create --repo Fr0do/<project>` (s_cot, mmred, bbbo)
 - Collaborator updates: `/research log` via Telegram bot → Notion
 

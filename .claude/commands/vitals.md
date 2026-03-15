@@ -15,9 +15,9 @@ ls bot/handlers/*.py | wc -l
 ls bot/services/*.py | wc -l
 
 # GitHub
-gh issue list --repo Fr0do/ouroboros --state open --json number,title
-gh issue list --repo Fr0do/ouroboros --state closed --json number | jq length
-gh release list --repo Fr0do/ouroboros --limit 1
+gh issue list --repo Fr0do/ourosss --state open --json number,title
+gh issue list --repo Fr0do/ourosss --state closed --json number | jq length
+gh release list --repo Fr0do/ourosss --limit 1
 
 # Team tasks
 ls team/tasks/*.yaml 2>/dev/null | wc -l
@@ -33,7 +33,7 @@ Format the results as a Unicode dashboard:
 
 ```
 ╔══════════════════════════════════════════╗
-║         OUROBOROS VITAL STATS            ║
+║         OUROSSS VITAL STATS            ║
 ╠══════════════════════════════════════════╣
 ║ Git (30d)                                ║
 ║   Commits: N   |  +X / -Y LOC           ║

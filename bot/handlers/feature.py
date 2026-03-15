@@ -2,7 +2,7 @@
 /feature — file a GitHub issue from Telegram chat.
 
 Usage:
-  /feature <description>  — create a [feat] issue on Fr0do/ouroboros
+  /feature <description>  — create a [feat] issue on Fr0do/ourosss
 """
 import asyncio
 import logging
@@ -13,9 +13,9 @@ from telegram.ext import ContextTypes, CommandHandler
 from ..services.config import GH_BIN
 from ..services.tg import authorized
 
-logger = logging.getLogger("ouroboros")
+logger = logging.getLogger("ourosss")
 
-REPO = "Fr0do/ouroboros"
+REPO = "Fr0do/ourosss"
 
 
 def _make_title(description: str, max_len: int = 60) -> str:

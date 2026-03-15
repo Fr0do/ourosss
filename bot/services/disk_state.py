@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 from ..services.ssh import ssh_exec
 
-logger = logging.getLogger("ouroboros")
+logger = logging.getLogger("ourosss")
 
 NFS_HOST = "kurkin-1"
 NFS_PATH = "/workspace-SR004.nfs2"

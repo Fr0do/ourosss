@@ -1,7 +1,7 @@
 #!/bin/bash
 SESSION_NAME="ouro"
 PYTHON="/workspace-SR004.nfs2/kurkin/envs/kurkin_313_torch/bin/python"
-DIR="/workspace-SR004.nfs2/kurkin/ouroboros"
+DIR="/workspace-SR004.nfs2/kurkin/ourosss"
 
 cd "$DIR"
 git pull --ff-only origin main 2>/dev/null || echo "git pull skipped"

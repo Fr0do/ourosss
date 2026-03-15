@@ -32,7 +32,7 @@ logging.basicConfig(
         logging.FileHandler(LOG_FILE),
     ],
 )
-logger = logging.getLogger("ouroboros")
+logger = logging.getLogger("ourosss")
 
 
 

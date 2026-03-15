@@ -19,7 +19,7 @@ from telegram.ext import ContextTypes, CommandHandler
 from ..services.vitals import collect_all
 from ..services.tg import send_long
 
-logger = logging.getLogger("ouroboros")
+logger = logging.getLogger("ourosss")
 
 # Apple-minimal palette
 BLUE = "#4A90D9"

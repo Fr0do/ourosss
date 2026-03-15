@@ -5,7 +5,7 @@ from pathlib import Path
 
 from .config import GH_BIN
 
-logger = logging.getLogger("ouroboros")
+logger = logging.getLogger("ourosss")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 

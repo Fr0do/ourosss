@@ -1,4 +1,4 @@
-Update the ouroboros project page on fr0do.github.io with current vitals data.
+Update the ourosss project page on fr0do.github.io with current vitals data.
 
 Run these steps:
 
@@ -13,8 +13,8 @@ HANDLERS=$(ls bot/handlers/*.py | wc -l | tr -d ' ')
 SERVICES=$(ls bot/services/*.py | wc -l | tr -d ' ')
 
 # GitHub stats
-OPEN=$(gh issue list --repo Fr0do/ouroboros --state open --json number --jq length 2>/dev/null || echo "—")
-CLOSED=$(gh issue list --repo Fr0do/ouroboros --state closed --json number --jq length 2>/dev/null || echo "—")
+OPEN=$(gh issue list --repo Fr0do/ourosss --state open --json number --jq length 2>/dev/null || echo "—")
+CLOSED=$(gh issue list --repo Fr0do/ourosss --state closed --json number --jq length 2>/dev/null || echo "—")
 VERSION=$(grep "^- v" OUROBOROS.md | head -1 | sed 's/^- \(v[^ ]*\).*/\1/')
 ```
 

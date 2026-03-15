@@ -16,7 +16,7 @@ from telegram.ext import ContextTypes, CommandHandler
 from ..services.tg import authorized
 from ..services.page import update_page
 
-logger = logging.getLogger("ouroboros")
+logger = logging.getLogger("ourosss")
 
 VALID_TAGS = {"status", "finding", "milestone"}
 

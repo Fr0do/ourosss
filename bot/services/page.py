@@ -1,4 +1,4 @@
-"""Generate and push updated HTML for the ouroboros project page."""
+"""Generate and push updated HTML for the ourosss project page."""
 import asyncio
 import html as html_mod
 import json
@@ -9,7 +9,7 @@ from pathlib import Path
 
 from .vitals import collect_all
 
-logger = logging.getLogger("ouroboros")
+logger = logging.getLogger("ourosss")
 
 SITE_REPO = Path.home() / "experiments" / "fr0do.github.io"
 OUROBOROS_PAGE = SITE_REPO / "ouroboros" / "index.html"

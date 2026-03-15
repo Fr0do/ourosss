@@ -63,7 +63,7 @@ Rule: artifact + paper + code released atomically. A result without reproducible
 ## Issue & Reporting Protocol
 
 **Issue routing:**
-- Infrastructure issues (bot, CI, tooling) → `Fr0do/ouroboros`
+- Infrastructure issues (bot, CI, tooling) → `Fr0do/ourosss`
 - Research issues (training, experiments, paper) → project repo
 
 **Notion sync:**

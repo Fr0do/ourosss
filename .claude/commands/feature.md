@@ -25,7 +25,7 @@ From the description, draft a GitHub issue:
 
 Create it:
 ```bash
-gh issue create --repo Fr0do/ouroboros --title "[feat] ..." --body "$(cat <<'EOF'
+gh issue create --repo Fr0do/ourosss --title "[feat] ..." --body "$(cat <<'EOF'
 ...
 EOF
 )"

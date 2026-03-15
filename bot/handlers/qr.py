@@ -25,7 +25,7 @@ from ..services.tg import authorized
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "artifacts" / "qr-mosaic"))
 from qr_mosaic import MosaicBlender, QRGenerator
 
-logger = logging.getLogger("ouroboros")
+logger = logging.getLogger("ourosss")
 
 DEFAULT_OPACITY = 0.5
 DEFAULT_STYLE = "halftone"

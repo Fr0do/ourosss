@@ -21,7 +21,7 @@ from ..services.notion import (
 )
 from ..services.config import NOTION_SECRET, NOTION_RESEARCH_DB_ID
 
-logger = logging.getLogger("ouroboros")
+logger = logging.getLogger("ourosss")
 
 USAGE = (
     "*Usage:*\n"

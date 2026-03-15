@@ -22,7 +22,7 @@ from ..services.notion import (
 )
 from ..services.config import NOTION_SECRET, NOTION_DB_ID
 
-logger = logging.getLogger("ouroboros")
+logger = logging.getLogger("ourosss")
 
 DEFAULT_MODEL = "LFM2.5-1.2B-Thinking"
 

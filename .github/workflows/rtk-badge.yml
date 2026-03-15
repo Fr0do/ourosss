@@ -2,7 +2,7 @@ name: RTK Badge
 
 # Badge JSON is updated locally via `rtk gain` and committed.
 # Shields.io reads it directly from the repo raw URL:
-# https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Fr0do/ouroboros/main/.github/rtk-badge.json
+# https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Fr0do/ourosss/main/.github/rtk-badge.json
 
 on:
   push:

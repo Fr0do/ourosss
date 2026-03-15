@@ -8,7 +8,7 @@ from ..services.disk_state import (
     _trend_line,
 )
 
-logger = logging.getLogger("ouroboros")
+logger = logging.getLogger("ourosss")
 
 CHECK_INTERVAL_SECONDS = 21600  # every 6 hours
 

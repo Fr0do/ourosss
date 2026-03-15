@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 from .config import NOTION_SECRET, NOTION_DB_ID, NOTION_RESEARCH_DB_ID
 
-logger = logging.getLogger("ouroboros")
+logger = logging.getLogger("ourosss")
 
 BENCHMARKS = {
     "json_pathfinder",
@@ -25,7 +25,7 @@ TOPOLOGIES = {"erdos_renyi", "power_law", "mixed"}
 MODELS = {"LFM2.5-1.2B-Thinking", "Qwen3-1.7B"}
 
 
-RESEARCH_PROJECTS = {"s_cot", "mmred", "bbbo", "ouroboros"}
+RESEARCH_PROJECTS = {"s_cot", "mmred", "bbbo", "ourosss"}
 RESEARCH_TYPES = {"finding", "milestone", "progress", "experiment", "decision"}
 RESEARCH_STATUSES = {"active", "completed", "blocked", "archived"}
 

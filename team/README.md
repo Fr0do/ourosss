@@ -17,7 +17,7 @@ Tasks are automatically routed to the optimal model based on their type.
 id: "042"
 type: implement          # plan | implement | explore | review
 title: "Add /research handler"
-project: ouroboros       # ouroboros | s_cot | mmred | bbbo
+project: ourosss         # ourosss | s_cot | mmred | bbbo
 status: pending          # pending | running | done | failed
 context: |
   Description of what needs to be done.

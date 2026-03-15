@@ -7,7 +7,7 @@
 export PATH="$HOME/.local/bin:$PATH:/opt/homebrew/bin:/usr/local/bin"
 
 # Fetch open auto-dev issues with titles
-issues_json=$(gh issue list --repo Fr0do/ouroboros --label auto-dev --state open \
+issues_json=$(gh issue list --repo Fr0do/ourosss --label auto-dev --state open \
     --json number,title 2>/dev/null)
 
 [ -z "$issues_json" ] && exit 0
@@ -30,7 +30,7 @@ if [ -n "$issues" ]; then
 ${issues}
 
 To handle: run ./scripts/auto-dev.sh in a separate terminal.
-Or implement manually: gh issue view <N> --repo Fr0do/ouroboros
+Or implement manually: gh issue view <N> --repo Fr0do/ourosss
 EOF
 fi
 

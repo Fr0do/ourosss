@@ -460,7 +460,7 @@ wheels = [
 ]
 
 [[package]]
-name = "ouroboros"
+name = "ourosss"
 version = "7.0.0"
 source = { editable = "." }
 dependencies = [

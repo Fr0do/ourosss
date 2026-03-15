@@ -1,4 +1,4 @@
-# CLAUDE.md — Ouroboros
+# CLAUDE.md — OuroSSS
 
 ## What Is This
 Root governance for Max's research. Bot (`bot/`), governance protocol (`OUROBOROS.md`).
@@ -16,7 +16,7 @@ Delegation is mandatory, not optional.
 
 ## Environment
 - Secrets in `.env` (gitignored). `.env.example` tracked — update both together.
-- Deps: `uv sync --locked` to install. `uv lock` after changing deps. `uv run ouroboros` to start bot.
+- Deps: `uv sync --locked` to install. `uv lock` after changing deps. `uv run ourosss` to start bot.
 
 ## Key Files
 | File | Purpose |
@@ -30,7 +30,7 @@ Delegation is mandatory, not optional.
 ## Issue Journaling
 - **Create issue FIRST** — before any feature/fix code. No exceptions. Retroactive if forgotten.
 - `fixes #N` in commits to auto-close. Comment progress + commit hashes.
-- Triage: `gh issue list --repo Fr0do/ouroboros --state open`
+- Triage: `gh issue list --repo Fr0do/ourosss --state open`
 
 ## Auto-Dev Dispatch
 Hook (`.claude/hooks/check-auto-dev.sh`) injects pending `auto-dev` issues into context.

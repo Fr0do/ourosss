@@ -16,7 +16,7 @@
 
 cd "$(dirname "$0")/.."
 
-REPO="Fr0do/ouroboros"
+REPO="Fr0do/ourosss"
 MAX_TURNS="${AUTO_DEV_MAX_TURNS:-50}"
 POLL_INTERVAL="${AUTO_DEV_POLL_INTERVAL:-60}"
 TOTAL_TIMEOUT="${AUTO_DEV_TIMEOUT:-1800}"  # 30 min total budget
@@ -95,7 +95,7 @@ claim_issue() {
 build_prompt() {
     local num=$1 title=$2 body=$3
     cat <<PROMPT
-You are an autonomous feature development agent for the ouroboros project.
+You are an autonomous feature development agent for the ourosss project.
 
 ## Task
 Implement GitHub issue #${num}: ${title}

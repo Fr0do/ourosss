@@ -1,5 +1,5 @@
 [project]
-name = "ouroboros"
+name = "ourosss"
 version = "7.0.0"
 description = "Research governance protocol — Telegram bot, multi-agent orchestration, CI/CD"
 requires-python = ">=3.12"
@@ -14,9 +14,9 @@ dependencies = [
     "pyyaml>=6.0",
 ]
 
-# Entry point: `uv run ouroboros` starts the bot
+# Entry point: `uv run ourosss` starts the bot
 [project.scripts]
-ouroboros = "bot.main:main"
+ourosss = "bot.main:main"
 
 # PEP 735 dependency groups (uv-native, replaces optional-dependencies)
 [dependency-groups]

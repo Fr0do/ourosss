@@ -6,12 +6,16 @@ allowed-tools: Bash, Read, Glob, Grep, Agent, WebSearch
 
 Review a LaTeX paper and produce structured, actionable feedback — as a rigorous peer reviewer would.
 
+## Setup
+
+Read `~/.claude/research-env.md` to resolve paper repo paths, main .tex filenames, and target venues.
+
 ## Arguments
 
 Parse `$ARGUMENTS`:
 
-- **project**: directory name under `~/experiments/` containing `.tex` files (default: `s_cot_tex`)
-- **section NAME**: review only a specific section (e.g. `section introduction`, `section results`). Matched fuzzily against filenames in `sections/`.
+- **project**: project name from research-env (default: first paper repo listed)
+- **section NAME**: review only a specific section. Matched fuzzily against filenames in `sections/`.
 - **focus ASPECT**: narrow the review to one concern:
   - `writing` — prose quality, clarity, conciseness, academic tone
   - `structure` — logical flow, section organization, narrative arc
@@ -21,62 +25,56 @@ Parse `$ARGUMENTS`:
   - `consistency` — terminology drift, tense shifts, repeated phrases, numbering
   - `camera` — camera-ready checklist (page limit, anonymization, formatting, bib style)
   - (default: all aspects)
-- **venue NAME**: target venue conventions (e.g. `neurips`, `icml`, `acl`, `arxiv`). Affects page limits, anonymization rules, citation style checks.
+- **venue NAME**: override target venue from research-env (e.g. `neurips`, `icml`, `acl`, `arxiv`)
 - **diff**: review only files changed since last commit (`git diff HEAD~1 --name-only`)
 
 ## Steps
 
 1. **Discover the paper structure.**
-   - `ls ~/experiments/<project>/` to find main .tex
-   - `ls ~/experiments/<project>/sections/` if present
-   - Read `CLAUDE.md` in the project root for context (architecture, status, conventions)
+   - List the paper directory to find main .tex
+   - List `sections/` subdirectory if present
+   - Read `CLAUDE.md` in the project root for context
    - Read the main .tex to get the `\input{}` order and preamble (packages, macros, custom commands)
 
 2. **Read the target content.**
-   - If `section` is specified: find the matching file and read it.
-   - If `diff` is specified: `git -C ~/experiments/<project> diff HEAD~1 --name-only -- '*.tex'` then read those files.
+   - If `section` specified: find the matching file and read it.
+   - If `diff` specified: `git diff HEAD~1 --name-only -- '*.tex'` then read those files.
    - Otherwise: read all .tex files in order (abstract → appendix).
    - Also read the `.bib` file for citation review.
 
 3. **Run automated checks (Bash).**
    All in parallel:
-   - **Compilation**: `cd ~/experiments/<project> && latexmk -pdf -interaction=nonstopmode <main>.tex 2>&1 | tail -30` — capture warnings/errors
-   - **Undefined refs**: `grep -n 'undefined' <main>.log 2>/dev/null | head -20`
-   - **TODO/FIXME scan**: `grep -rn 'TODO\|FIXME\|XXX\|HACK' sections/ 2>/dev/null`
-   - **Overfull boxes**: `grep -n 'Overfull' <main>.log 2>/dev/null | head -10`
-   - **Citation warnings**: `grep -n 'Citation.*undefined\|Empty.*bibitem' <main>.log 2>/dev/null`
+   - **Compilation**: `latexmk -pdf -interaction=nonstopmode <main>.tex 2>&1 | tail -30`
+   - **Undefined refs**: `grep -n 'undefined' <main>.log | head -20`
+   - **TODO/FIXME scan**: `grep -rn 'TODO\|FIXME\|XXX\|HACK' sections/`
+   - **Overfull boxes**: `grep -n 'Overfull' <main>.log | head -10`
+   - **Citation warnings**: `grep -n 'Citation.*undefined\|Empty.*bibitem' <main>.log`
 
 4. **Produce the review.**
-
-   Use this structure (output as Markdown, not LaTeX):
 
    ```markdown
    # Paper Review: <title>
    **Project**: <project> | **Venue**: <venue> | **Date**: YYYY-MM-DD
 
    ## Summary
-   2-3 sentence summary of what the paper does and its main contribution.
+   2-3 sentence summary of the paper's contribution.
 
    ## Strengths
    - Numbered list of what works well
 
    ## Weaknesses
-   - Numbered list of issues, each with:
+   - Numbered list, each with:
      - **Location**: file:line or section name
      - **Severity**: major / minor / nit
      - **Issue**: what's wrong
      - **Suggestion**: concrete fix
 
    ## Section-by-Section Notes
-   ### Abstract
-   ...
-   ### Introduction
-   ...
    (one subsection per paper section)
 
    ## Notation & Consistency
-   - Symbol table: list all math symbols used and where defined
-   - Flag any used-before-defined or inconsistent usage
+   - Symbol table: all math symbols and where defined
+   - Flag used-before-defined or inconsistent usage
 
    ## Citations
    - Missing references for unsupported claims
@@ -95,31 +93,23 @@ Parse `$ARGUMENTS`:
    ```
 
 5. **Severity guidelines.**
-   - **Major**: incorrect claim, missing experiment, logical gap, result doesn't support conclusion
-   - **Minor**: unclear sentence, missing reference, notation inconsistency, weak transition
-   - **Nit**: typo, grammar, formatting preference, style suggestion
+   - **Major**: incorrect claim, missing experiment, logical gap
+   - **Minor**: unclear sentence, missing reference, notation inconsistency
+   - **Nit**: typo, grammar, formatting preference
 
-6. **If `focus` is set**, only produce the relevant section of the review (e.g. `focus citations` → only the Citations section + any major issues found).
+6. **If `focus` is set**, only produce the relevant section of the review.
 
 7. **WebSearch for citation gaps** (only when `focus citations` or full review):
-   - For claims without citations, search arXiv for the most relevant supporting paper
-   - For the main contribution, search for concurrent/competing work from the last 12 months
-   - Limit to 3-5 searches to stay focused
+   - For claims without citations, search arXiv for supporting papers
+   - For the main contribution, search for concurrent work from the last 12 months
+   - Limit to 3-5 searches
 
 ## Example Usage
 
 ```
-/review-paper                                    # full review of s_cot_tex
-/review-paper s_cot_tex section results          # just the results section
-/review-paper s_cot_tex focus writing            # prose quality only
-/review-paper s_cot_tex focus camera venue neurips  # camera-ready checklist
-/review-paper long-vqa diff                      # review only recent changes
-/review-paper s_cot_tex focus citations          # citation gap analysis
+/review-paper
+/review-paper section results
+/review-paper focus writing
+/review-paper focus camera venue neurips
+/review-paper diff
 ```
-
-## Known Paper Repos
-
-| Project | Dir | Main .tex | Venue |
-|---------|-----|-----------|-------|
-| s_cot | s_cot_tex | neurips_2025.tex | NeurIPS 2025 |
-| long-vqa | long-vqa | (TBD) | (TBD) |

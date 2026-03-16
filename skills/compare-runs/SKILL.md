@@ -1,16 +1,20 @@
 ---
 name: compare-runs
 description: Compare two GRPO training runs side-by-side. Shows accuracy, reward, and advantage delta between two checkpoints or step ranges. Use when the user wants to compare ablations, hyperparameter sweeps, or two training configurations.
-allowed-tools: Bash
+allowed-tools: Bash, Read
 ---
 
 Compare two training runs from the same project. Loads completions parquets for both runs and prints a side-by-side table with delta column.
+
+## Setup
+
+Read `~/.claude/research-env.md` to resolve: remote host, project remote paths, completions glob patterns, and remote Python interpreter path.
 
 ## Arguments
 
 Parse `$ARGUMENTS`:
 
-- **project**: s_cot (default), long-vqa, bbbo
+- **project**: project name from research-env (default: first listed)
 - **run A** and **run B**: specified as:
   - Step indices: `500 1000` (compare step 500 vs step 1000)
   - Step ranges: `0:50 100:150` (first 50 steps vs steps 100-150, shows mean)
@@ -20,72 +24,37 @@ Parse `$ARGUMENTS`:
 
 ## Steps
 
-1. Parse project and run identifiers from `$ARGUMENTS`. Default: s_cot, latest two completions files.
+1. Parse project and run identifiers from `$ARGUMENTS`.
 
-2. SSH to kurkin-1 and run a Python one-liner/heredoc using `/workspace-SR004.nfs2/kurkin/envs/kurkin_313_torch/bin/python`:
+2. SSH to remote host and run a Python heredoc using the remote interpreter:
 
-   ```python
-   import glob, pandas as pd, numpy as np, os
+   - Glob the project's completions pattern to find all parquet files
+   - Select files for run A and run B based on parsed indices/ranges
+   - For each run, load parquets with pandas and compute:
+     - Auto-detected reward columns: `[c for c in df.columns if c.endswith('_reward_func')]`
+     - Mean of each reward column
+     - Advantage mean and std (if `advantage` column exists)
+     - Sample count
 
-   project = "<project>"
-   base_pattern = "<completions_glob_pattern>"
+3. Print comparison table:
 
-   files = sorted(glob.glob(base_pattern))
-   if not files:
-       print("No completions found")
-       exit(1)
-
-   # Select files for run A and run B
-   # If step indices: files[A], files[B]
-   # If ranges: files[a_start:a_end], files[b_start:b_end]
-
-   def load_stats(file_list):
-       dfs = [pd.read_parquet(f) for f in file_list]
-       df = pd.concat(dfs, ignore_index=True)
-       reward_cols = [c for c in df.columns if c.endswith('_reward_func')]
-       stats = {}
-       for col in reward_cols:
-           stats[col.replace('_reward_func', '')] = df[col].mean()
-       stats['advantage_mean'] = df['advantage'].mean() if 'advantage' in df.columns else float('nan')
-       stats['advantage_std'] = df['advantage'].std() if 'advantage' in df.columns else float('nan')
-       stats['n_samples'] = len(df)
-       stats['steps'] = [os.path.basename(f) for f in file_list]
-       return stats
-
-   a_stats = load_stats(files_a)
-   b_stats = load_stats(files_b)
-
-   # Print table
-   metrics = [k for k in a_stats if k not in ('n_samples', 'steps')]
-   print(f"{'Metric':<22} {'Run A':>10} {'Run B':>10} {'Delta':>10}")
-   print("-" * 56)
-   for m in metrics:
-       va = a_stats.get(m, float('nan'))
-       vb = b_stats.get(m, float('nan'))
-       delta = vb - va
-       arrow = '↑' if delta > 0.001 else ('↓' if delta < -0.001 else '→')
-       print(f"{m:<22} {va:>10.4f} {vb:>10.4f} {delta:>+10.4f} {arrow}")
-   print(f"{'n_samples':<22} {a_stats['n_samples']:>10} {b_stats['n_samples']:>10}")
-   print(f"\nRun A: {a_stats['steps']}")
-   print(f"Run B: {b_stats['steps']}")
+   ```
+   Metric                    Run A      Run B      Delta
+   --------------------------------------------------------
+   accuracy                 0.4130     0.5200    +0.1070 ↑
+   format                   0.9800     0.9900    +0.0100 ↑
+   advantage_mean           0.0234    -0.0102    -0.0336 ↓
+   advantage_std            1.2340     0.9870    -0.2470 ↓
+   n_samples                    64         64
    ```
 
-3. Present the output with:
-   - Header: `Run A` and `Run B` labels (file names or user-specified labels)
-   - Each reward metric row with delta and direction arrow (↑ better, ↓ worse)
-   - Highlight the accuracy row (most important)
-   - Note: for accuracy, higher is better; for format rewards, higher is better
-
-## Project Paths (completions)
-- s_cot: kurkin-1:/workspace-SR004.nfs2/kurkin/s_cot/spectral-r1-checkpoints/fixed/completions/completions_*.parquet
-- long-vqa: kurkin-1:/workspace-SR004.nfs2/kurkin/long-vqa/**/completions_*.parquet
-- bbbo: kurkin-1:/workspace-SR004.nfs2/kurkin/bbbo/GeneralOptimizer/**/completions_*.parquet
+   - Delta column with direction arrows: ↑ (delta > 0.001), ↓ (delta < -0.001), → (unchanged)
+   - Show run file names at the bottom for reference
 
 ## Example Usage
 
 ```
-/compare-runs s_cot latest
-/compare-runs s_cot 500 1000
-/compare-runs s_cot step -10: step -5:
-/compare-runs long-vqa 0:20 50:70
+/compare-runs latest
+/compare-runs 500 1000
+/compare-runs step -10: step -5:
 ```

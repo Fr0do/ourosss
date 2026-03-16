@@ -33,11 +33,11 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
 _raw_users = os.getenv("AUTHORIZED_USERS", "")
 CHAT_IDS = [int(x.strip()) for x in _raw_users.split(",") if x.strip()]
 
-REMOTE = "kurkin-1"
+REMOTE = os.getenv("HEARTBEAT_REMOTE", "")  # empty = run locally (on the server itself)
 PROJECTS = {
-    "s_cot": {"tmux": "cot", "path": "/workspace-SR004.nfs2/kurkin/s_cot"},
-    "long-vqa": {"tmux": "vqa", "path": "/workspace-SR004.nfs2/kurkin/long-vqa"},
-    "bbbo": {"tmux": "bbbo", "path": "/workspace-SR004.nfs2/kurkin/bbbo/GeneralOptimizer"},
+    "s_cot": {"tmux": "cot"},
+    "long-vqa": {"tmux": "vqa"},
+    "bbbo": {"tmux": "bbbo"},
 }
 
 logging.basicConfig(
@@ -51,16 +51,17 @@ logging.basicConfig(
 log = logging.getLogger("heartbeat")
 
 
-def ssh(cmd: str, timeout: int = 20) -> tuple[int, str]:
-    """Run command on REMOTE, return (returncode, stdout+stderr)."""
+def run_cmd(cmd: str, timeout: int = 20) -> tuple[int, str]:
+    """Run command locally or via SSH (if HEARTBEAT_REMOTE is set)."""
     try:
-        result = subprocess.run(
-            ["ssh", "-o", "ConnectTimeout=10", REMOTE, cmd],
-            capture_output=True, text=True, timeout=timeout,
-        )
+        if REMOTE:
+            args = ["ssh", "-o", "ConnectTimeout=10", REMOTE, cmd]
+        else:
+            args = ["bash", "-c", cmd]
+        result = subprocess.run(args, capture_output=True, text=True, timeout=timeout)
         return result.returncode, (result.stdout + result.stderr).strip()
     except subprocess.TimeoutExpired:
-        return -1, "SSH timeout"
+        return -1, "timeout"
     except Exception as e:
         return -1, str(e)
 
@@ -98,7 +99,7 @@ def save_state(state: dict):
 
 def check_gpu() -> dict[str, str]:
     """Returns {index: util_pct} for all GPUs."""
-    rc, out = ssh("nvidia-smi --query-gpu=index,utilization.gpu --format=csv,noheader")
+    rc, out = run_cmd("nvidia-smi --query-gpu=index,utilization.gpu --format=csv,noheader")
     if rc != 0:
         return {}
     result = {}
@@ -113,7 +114,7 @@ def check_gpu() -> dict[str, str]:
 
 def check_tmux() -> set[str]:
     """Returns set of running tmux session names."""
-    rc, out = ssh("tmux ls 2>/dev/null || true")
+    rc, out = run_cmd("tmux ls 2>/dev/null || true")
     if rc != 0 or not out.strip():
         return set()
     sessions = set()
@@ -125,7 +126,7 @@ def check_tmux() -> set[str]:
 
 def check_log_tail(tmux_session: str) -> str:
     """Returns last 5 lines of tmux pane."""
-    rc, out = ssh(f"tmux capture-pane -t {tmux_session} -p 2>/dev/null | tail -5")
+    rc, out = run_cmd(f"tmux capture-pane -t {tmux_session} -p 2>/dev/null | tail -5")
     return out if rc == 0 else ""
 
 

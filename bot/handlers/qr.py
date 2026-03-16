@@ -21,9 +21,13 @@ from telegram.ext import CommandHandler, ContextTypes, MessageHandler, filters
 
 from ..services.tg import authorized
 
-# Make qr_mosaic library importable
+# Make qr_mosaic library importable (optional — missing on fresh clones)
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "artifacts" / "qr-mosaic"))
-from qr_mosaic import MosaicBlender, QRGenerator
+try:
+    from qr_mosaic import MosaicBlender, QRGenerator
+except ImportError:
+    MosaicBlender = None  # type: ignore[assignment,misc]
+    QRGenerator = None  # type: ignore[assignment,misc]
 
 logger = logging.getLogger("ourosss")
 
@@ -82,6 +86,10 @@ async def qr_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     data = " ".join(context.args)
 
+    if QRGenerator is None:
+        await update.message.reply_text("QR module not installed (qr_mosaic missing).")
+        return
+
     try:
         qr_img = QRGenerator().generate(data)
         buf = _image_to_bytes(qr_img)
@@ -97,6 +105,10 @@ async def photo_mosaic_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     caption = update.message.caption
     if not caption:
         return  # Ignore photos without captions (don't hijack all photo messages)
+
+    if MosaicBlender is None:
+        await update.message.reply_text("QR mosaic module not installed (qr_mosaic missing).")
+        return
 
     data, style, opacity = _parse_caption(caption)
     if not data:

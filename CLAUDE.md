@@ -14,6 +14,25 @@ Delegation is mandatory, not optional.
 
 **Hard rule**: before writing >20 lines of code yourself, launch a Sonnet `Agent` subagent. No exceptions. Opus writes plans and reviews; Sonnet writes code.
 
+## Swarm Orchestration
+Multi-agent parallelism via `npx -y @swarmify/agents-mcp` (configured in MCP settings).
+
+| Agent | Tier | Best for |
+|---|---|---|
+| **codex** (gpt-5.4, subscription) | ≈ Sonnet | Self-contained implementation, clean fixes, commits |
+| **gemini** | ≈ Sonnet+ | Complex multi-file features, architectural changes |
+| **claude** | ≈ Opus | Research, exploration — avoid (same tier as you) |
+
+**Usage rules:**
+- Spawn codex/gemini in parallel for independent tasks; never spawn claude (wasteful).
+- Always pass `cwd` to agents — they need the project root.
+- Use `mode="edit"` for implementation, `mode="ralph"` for autonomous backlog work (requires `RALPH.md`).
+- Create `RALPH.md` in the project root with checkbox task lists before spawning in ralph mode.
+- Check status with `Swarm.Status(task_name)` — wait ≥2 min before first poll.
+- Dashboard: `python scripts/agent_dashboard.py --days 1` (tracks Claude via ccusage, Codex via SQLite).
+
+**Model selection in prompts:** Swarm uses `~/.codex/config.toml` default (`gpt-5.4`). No need to specify model explicitly — it's already the top tier.
+
 ## Environment
 - Secrets in `.env` (gitignored). `.env.example` tracked — update both together.
 - Deps: `uv sync --locked` to install. `uv lock` after changing deps. `uv run ourosss` to start bot.

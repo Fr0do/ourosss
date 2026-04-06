@@ -24,11 +24,11 @@ Multi-agent parallelism via `npx -y @swarmify/agents-mcp` (configured in MCP set
 | **codex** | `detailed` | gpt-5.4 | ≈ Opus | Architecture, complex rewrites |
 | **codex** | `default` | gpt-5.3-codex | ≈ Sonnet | Standard implementation |
 | **codex** | `fast` | gpt-5.3-codex-spark | ≈ Haiku | Simple fixes, renames, boilerplate |
-| **gemini** | `detailed` | gemini-2.5-pro | ≈ Opus | Multi-system features, paper edits |
-| **gemini** | `fast` | gemini-2.5-flash | ≈ Haiku | Search, exploration, summarization |
+| **gemini** | `detailed` | gemini-3.1-pro | ≈ Opus | Multi-system features, paper edits |
+| **gemini** | `fast` | gemini-3-flash | ≈ Haiku | Search, exploration, summarization |
 | **claude** | any | sonnet-4-6 | ≈ Sonnet | Avoid — same provider as orchestrator |
 
-Gemini default model set in `~/.gemini/settings.json` → `gemini-2.5-pro-preview-03-25`.
+Gemini default model set in `~/.gemini/settings.json` → `gemini-3.1-pro`. Flash via `effort="fast"`.
 
 ### Pipeline pattern
 

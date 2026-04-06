@@ -17,21 +17,42 @@ Delegation is mandatory, not optional.
 ## Swarm Orchestration
 Multi-agent parallelism via `npx -y @swarmify/agents-mcp` (configured in MCP settings).
 
-| Agent | Tier | Best for |
-|---|---|---|
-| **codex** (gpt-5.4, subscription) | ≈ Sonnet | Self-contained implementation, clean fixes, commits |
-| **gemini** | ≈ Sonnet+ | Complex multi-file features, architectural changes |
-| **claude** | ≈ Opus | Research, exploration — avoid (same tier as you) |
+### Agent × effort → model
 
-**Usage rules:**
-- Spawn codex/gemini in parallel for independent tasks; never spawn claude (wasteful).
-- Always pass `cwd` to agents — they need the project root.
-- Use `mode="edit"` for implementation, `mode="ralph"` for autonomous backlog work (requires `RALPH.md`).
-- Create `RALPH.md` in the project root with checkbox task lists before spawning in ralph mode.
-- Check status with `Swarm.Status(task_name)` — wait ≥2 min before first poll.
-- Dashboard: `python scripts/agent_dashboard.py --days 1` (tracks Claude via ccusage, Codex via SQLite).
+| Agent | `effort` | Model | Tier | Best for |
+|---|---|---|---|---|
+| **codex** | `detailed` | gpt-5.4 | ≈ Opus | Architecture, complex rewrites |
+| **codex** | `default` | gpt-5.3-codex | ≈ Sonnet | Standard implementation |
+| **codex** | `fast` | gpt-5.3-codex-spark | ≈ Haiku | Simple fixes, renames, boilerplate |
+| **gemini** | `detailed` | gemini-2.5-pro | ≈ Opus | Multi-system features, paper edits |
+| **gemini** | `fast` | gemini-2.5-flash | ≈ Haiku | Search, exploration, summarization |
+| **claude** | any | sonnet-4-6 | ≈ Sonnet | Avoid — same provider as orchestrator |
 
-**Model selection in prompts:** Swarm uses `~/.codex/config.toml` default (`gpt-5.4`). No need to specify model explicitly — it's already the top tier.
+Gemini default model set in `~/.gemini/settings.json` → `gemini-2.5-pro-preview-03-25`.
+
+### Pipeline pattern
+
+```
+1. Implement  — codex/gemini edit agents in parallel (independent tasks)
+2. Review     — codex plan+detailed agent on changed files
+3. Commit     — orchestrator (you) does git add/commit after review passes
+```
+
+### Usage rules
+- Never spawn claude subagents (same provider, wasteful).
+- Always pass `cwd`; match `effort` to task complexity.
+- `mode="edit"` for implementation, `mode="plan"` for review/exploration, `mode="ralph"` for backlog.
+- **Commits**: agents run in a git sandbox — YOU commit after agents finish.
+- Poll with `Swarm.Status(task_name)` — wait ≥2 min before first check.
+- Cost: `python scripts/agent_dashboard.py --days 1`
+
+### Review agent invocation
+```
+Swarm.Spawn(task_name="X-review", agent_type="codex", mode="plan", effort="detailed", cwd=...,
+  prompt="Review changes in [files]. Report: correctness, edge cases, test gaps, style.
+          Format: numbered list with severity (critical / warn / nit).")
+```
+Fix all `critical` before committing; use judgment on `warn`.
 
 ## Environment
 - Secrets in `.env` (gitignored). `.env.example` tracked — update both together.

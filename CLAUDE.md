@@ -14,8 +14,36 @@ Delegation is mandatory, not optional.
 
 **Hard rule**: before writing >20 lines of code yourself, launch a Sonnet `Agent` subagent. No exceptions. Opus writes plans and reviews; Sonnet writes code.
 
+## MCP Servers
+
+Two MCP servers are configured in `.claude/settings.json`:
+- **hermes** — `hermes mcp serve` — self-improving agent, memory, skills, delegation
+- **swarm** — `npx -y @swarmify/agents-mcp` — codex/gemini parallel subagents
+
+## Hermes (Self-Improving Agent)
+
+Hermes wraps Claude (primary) and Codex as providers with a closed learning loop.
+Config: `~/.hermes/config.yaml` · Model: `claude-opus-4-6` via Anthropic.
+
+### Key MCP tools
+| Tool category | Use when |
+|---|---|
+| `memory` | Store/retrieve cross-session facts, decisions, context |
+| `skills` | Browse/install/run reusable agent skills from registry |
+| `todo` | Break tasks into tracked subtasks |
+| `delegation` | Spawn isolated subagents for parallel work |
+| `session_search` | Search past reasoning traces (FTS5) |
+| `cronjob` | Schedule recurring autonomous tasks |
+| `rl` *(disabled)* | Export trajectories for RL training |
+
+### Self-improvement loop
+Hermes autonomously creates skills from successful reasoning traces and improves them during use.
+- Browse skill registry: `hermes skills browse`
+- View past sessions: `hermes sessions`
+- Analyze costs/patterns: `hermes insights --days 7`
+- Update hermes: `hermes update`
+
 ## Swarm Orchestration
-Multi-agent parallelism via `npx -y @swarmify/agents-mcp` (configured in MCP settings).
 
 ### Agent × effort → model
 
@@ -28,7 +56,7 @@ Multi-agent parallelism via `npx -y @swarmify/agents-mcp` (configured in MCP set
 | **gemini** | `fast` | gemini-3-flash | ≈ Haiku | Search, exploration, summarization |
 | **claude** | any | sonnet-4-6 | ≈ Sonnet | Avoid — same provider as orchestrator |
 
-Gemini default model set in `~/.gemini/settings.json` → `gemini-3.1-pro`. Flash via `effort="fast"`.
+Gemini default model: `~/.gemini/settings.json` → `gemini-3.1-pro`. Flash via `effort="fast"`.
 
 ### Pipeline pattern
 
@@ -38,13 +66,13 @@ Gemini default model set in `~/.gemini/settings.json` → `gemini-3.1-pro`. Flas
 3. Commit     — orchestrator (you) does git add/commit after review passes
 ```
 
-### Usage rules
+### Swarm rules
 - Never spawn claude subagents (same provider, wasteful).
 - Always pass `cwd`; match `effort` to task complexity.
 - `mode="edit"` for implementation, `mode="plan"` for review/exploration, `mode="ralph"` for backlog.
 - **Commits**: agents run in a git sandbox — YOU commit after agents finish.
 - Poll with `Swarm.Status(task_name)` — wait ≥2 min before first check.
-- Cost: `python scripts/agent_dashboard.py --days 1`
+- Cost: `/agent-dashboard`
 
 ### Review agent invocation
 ```

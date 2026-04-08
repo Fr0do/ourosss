@@ -1,0 +1,8 @@
+# Machine-specific artifacts — never commit
+*.bak
+*.local.*
+*.local
+hermes/sessions/
+hermes/state.db
+hermes/history/
+hermes/cache/

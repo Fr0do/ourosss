@@ -4,15 +4,25 @@
 Root governance for Max's research. Bot (`bot/`), governance protocol (`OUROBOROS.md`).
 
 ## Cost Discipline
-Delegation is mandatory, not optional.
+Delegation is mandatory, not optional. **Codex has the fattest limits — burn it first.** Anthropic models are reserved for planning only.
 
-| Task type | Model | Examples |
-|---|---|---|
-| Planning, architecture, debugging | **Opus** (you) | Design decisions, complex reasoning, code review |
-| Implementation (>20 lines) | **Sonnet subagent** | New files, handlers, refactoring, tests, HTML/CSS |
-| Exploration, search, summarization | **Haiku subagent** | Codebase search, file exploration, rote transforms |
+### Provider priority
 
-**Hard rule**: before writing >20 lines of code yourself, launch a Sonnet `Agent` subagent. No exceptions. Opus writes plans and reviews; Sonnet writes code.
+1. **Opus** (orchestrator, you) — planning, architecture, code review, final decisions. **Only Anthropic model used.** No Sonnet/Haiku subagents.
+2. **Codex** (via Swarm) — *default* implementation, refactoring, tests, exploration, summarization. Use until daily limits exhausted.
+3. **Gemini** (via Swarm) — *fallback after Codex* and for tasks Gemini is genuinely better at: huge-context reads (>200k tokens), multi-file paper edits, multimodal (image/PDF), search-heavy exploration via `gemini-3-flash`.
+
+| Task type | Route to |
+|---|---|
+| Planning, architecture, debugging, review | **Opus** (you) |
+| Implementation (>20 lines), refactoring, tests | **codex** subagent (Swarm) |
+| Simple fixes, renames, boilerplate | **codex** `effort=fast` |
+| Huge-context / multimodal / paper edits | **gemini** `effort=detailed` |
+| Search, exploration, summarization | **gemini** `effort=fast` (cheap) or **codex** `effort=fast` |
+
+**Hard rule**: before writing >20 lines of code yourself, spawn a **codex** Swarm agent. No exceptions. Do NOT spawn Sonnet/Haiku subagents via the `Agent` tool for implementation — that burns the same Anthropic quota Opus runs on. Use `Agent` only for read-only research tasks where context isolation matters.
+
+**Fallback chain**: codex → (on rate limit / quota exhausted) → gemini. Track via `/agent-dashboard`.
 
 ## MCP Servers
 
@@ -20,10 +30,22 @@ Two MCP servers are configured in `.claude/settings.json`:
 - **hermes** — `hermes mcp serve` — self-improving agent, memory, skills, delegation
 - **swarm** — `npx -y @swarmify/agents-mcp` — codex/gemini parallel subagents
 
+## Portable Config
+
+Config lives in `infra/` (tracked in repo). On a new machine:
+
+```bash
+bash infra/bootstrap.sh   # symlinks infra/hermes/config.yaml → ~/.hermes/config.yaml
+hermes login              # OAuth auth
+```
+
+See `infra/README.md` for full prerequisites and manual auth steps.
+
 ## Hermes (Self-Improving Agent)
 
 Hermes wraps Claude (primary) and Codex as providers with a closed learning loop.
-Config: `~/.hermes/config.yaml` · Model: `claude-opus-4-6` via Anthropic.
+Config: `infra/hermes/config.yaml` (symlinked to `~/.hermes/config.yaml`) · Model: `claude-opus-4-6` via Anthropic.
+Repos: https://github.com/NousResearch/hermes-agent · https://github.com/NousResearch/hermes-agent-self-evolution
 
 ### Key MCP tools
 | Tool category | Use when |
@@ -37,7 +59,13 @@ Config: `~/.hermes/config.yaml` · Model: `claude-opus-4-6` via Anthropic.
 | `rl` *(disabled)* | Export trajectories for RL training |
 
 ### Self-improvement loop
-Hermes autonomously creates skills from successful reasoning traces and improves them during use.
+Skills are stored as structured markdown in `~/.hermes/skills/<category>/`. After tasks with 5+ tool calls Hermes auto-generates skills; every ~15 tasks it self-evaluates against past solutions (`creation_nudge_interval: 15` in config.yaml).
+
+A companion repo (`hermes-agent-self-evolution`) runs **GEPA (Genetic-Pareto Prompt Evolution) + DSPy**: reads execution traces, identifies failure causes, proposes improved skills/tool descriptions/system prompts as PRs. Cost ~$2–10/run, no GPU.
+
+RL trajectory logging via `rl_cli.py` + Tinker-Atropos submodule is available but disabled in this config (`rl` toolset not in `platform_toolsets.cli`).
+
+- Sync skills across machines: `hermes skills snapshot export > infra/hermes/skills-snapshot.yaml`
 - Browse skill registry: `hermes skills browse`
 - View past sessions: `hermes sessions`
 - Analyze costs/patterns: `hermes insights --days 7`
@@ -67,7 +95,8 @@ Gemini default model: `~/.gemini/settings.json` → `gemini-3.1-pro`. Flash via 
 ```
 
 ### Swarm rules
-- Never spawn claude subagents (same provider, wasteful).
+- **Default agent type is `codex`** — fattest limits, burn first. Fall back to `gemini` only when codex is rate-limited or the task plays to Gemini's strengths (long context, multimodal, paper edits).
+- Never spawn claude subagents (same provider as orchestrator, wasteful).
 - Always pass `cwd`; match `effort` to task complexity.
 - `mode="edit"` for implementation, `mode="plan"` for review/exploration, `mode="ralph"` for backlog.
 - **Commits**: agents run in a git sandbox — YOU commit after agents finish.

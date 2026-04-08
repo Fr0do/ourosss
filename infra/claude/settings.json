@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "hermes": {
+      "command": "hermes",
+      "args": ["mcp", "serve"],
+      "type": "stdio"
+    },
+    "swarm": {
+      "command": "npx",
+      "args": ["-y", "@swarmify/agents-mcp"],
+      "type": "stdio"
+    }
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/check-auto-dev.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

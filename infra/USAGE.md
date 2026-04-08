@@ -10,6 +10,7 @@
 | Восстановить Claude скиллы на новом ноуте | `bash infra/local/restore-claude-skills.sh` |
 | Засеять новый сервер | `ssh HOST 'mkdir -p ~/kurkin && cd ~/kurkin && git clone git@github.com:Fr0do/ourosss.git && bash ourosss/infra/server/bootstrap-server.sh'` |
 | Засеять новый сервер c shared-user профилем | `ssh HOST 'mkdir -p ~/kurkin && cd ~/kurkin && git clone git@github.com:Fr0do/ourosss.git && OUROSSS_SHARED_USER=1 bash ourosss/infra/server/bootstrap-server.sh'` |
+| Поднять pinned Python/uv на сервере | `~/kurkin/bin/ourosss-bootstrap-python` |
 | Включить авто-синк на ноуте | `cp infra/local/com.ourosss.hermes-sync.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.ourosss.hermes-sync.plist` |
 | Толкнуть всё на сервер прямо сейчас | `SERVER_HOST=kurkin-vllm bash infra/local/sync-push.sh` |
 | Стянуть изменения на сервере прямо сейчас | `bash ~/kurkin/ourosss/infra/server/sync-pull.sh` |
@@ -135,6 +136,7 @@ bash infra/local/sync-push.sh
 # На сервере
 cd ~/kurkin/ourosss
 OUROSSS_SHARED_USER=1 bash infra/server/bootstrap-server.sh
+~/kurkin/bin/ourosss-bootstrap-python
 
 # После этого:
 ~/kurkin/bin/ourosss-profile hermes login
@@ -143,6 +145,7 @@ OUROSSS_SHARED_USER=1 bash infra/server/bootstrap-server.sh
 ```
 
 `ourosss-profile` запускает команду с `HOME=~/kurkin/home`, так что Hermes читает `~/kurkin/home/.hermes -> ~/kurkin/hermes`, а Claude хранит свои user-level файлы в `~/kurkin/home/.claude`.
+`ourosss-bootstrap-python` создаёт или переиспользует conda env `ourosss-py312`, ставит туда pinned `uv==0.11.4` и делает `uv sync --locked`.
 
 Если на хосте нет `systemd --user`, используй:
 ```bash

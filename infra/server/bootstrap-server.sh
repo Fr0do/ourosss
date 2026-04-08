@@ -122,6 +122,7 @@ fi
 ln -snf "$REPO/infra/server/profile-exec.sh" "$BASE/bin/ourosss-profile"
 ln -snf "$REPO/infra/server/claude-profile.sh" "$BASE/bin/ourosss-claude"
 ln -snf "$REPO/infra/server/ourosss-run.sh" "$BASE/bin/ourosss-run"
+ln -snf "$REPO/infra/server/bootstrap-python.sh" "$BASE/bin/ourosss-bootstrap-python"
 log "Installed profile wrappers in $BASE/bin"
 
 if command -v hermes >/dev/null 2>&1; then
@@ -163,6 +164,7 @@ echo "  $SECRETS/auth.json   -> hermes auth"
 echo "  $SECRETS/hermes.env  -> hermes env"
 echo "Logs: tail -f $LOGS/ourosss.log or journalctl --user -u ourosss -f"
 echo "Restart bot: systemctl --user restart ourosss"
+echo "Bootstrap pinned Python/uv: $BASE/bin/ourosss-bootstrap-python"
 if [ "$SHARED_USER_MODE" = "1" ]; then
   echo "Shared-user mode:"
   echo "  Claude: $BASE/bin/ourosss-claude"

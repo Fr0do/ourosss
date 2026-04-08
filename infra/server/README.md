@@ -2,8 +2,8 @@
 
 Prereqs on server:
 - git, ssh access to `git@github.com:Fr0do/ourosss`
+- conda (Miniconda / Mambaforge) for the pinned Python 3.12 env
 - Hermes CLI: `curl -fsSL https://hermes.sh | bash`
-- uv: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - (optional) gh auth login
 
 If the SSH account is shared with colleagues, use isolated profile mode so OuroSSS does not write to the shared `~/.hermes` or `~/.claude` paths.
@@ -22,12 +22,18 @@ ssh occ-8
 mkdir -p ~/kurkin && cd ~/kurkin
 git clone git@github.com:Fr0do/ourosss.git
 OUROSSS_SHARED_USER=1 bash ourosss/infra/server/bootstrap-server.sh
+~/kurkin/bin/ourosss-bootstrap-python
 
 # Run tools against ~/kurkin-scoped config
 ~/kurkin/bin/ourosss-profile hermes login
 ~/kurkin/bin/ourosss-claude
 ~/kurkin/bin/ourosss-run start
 ```
+
+`ourosss-bootstrap-python` creates or reuses conda env `ourosss-py312`, installs pinned `uv==0.11.4` into that env, and runs `uv sync --locked` against the repo. Override with:
+- `OUROSSS_CONDA_ENV`
+- `OUROSSS_PYTHON_SPEC`
+- `OUROSSS_UV_VERSION`
 
 If `systemd --user` is unavailable on the host, use the fallback launcher:
 ```bash

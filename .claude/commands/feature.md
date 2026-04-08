@@ -39,9 +39,10 @@ Ask: **"Want me to implement this now?"**
 
 If **yes**:
 1. Read the issue for the spec
-2. Plan the work (files to touch, approach)
-3. Spawn subagents for parallelizable parts; otherwise implement directly
-4. Commit with message referencing `fixes #N`
-5. Push to the current branch
+2. Plan the work (files to touch, approach) — Opus only plans, Opus does not write >20 lines of code itself
+3. Spawn **codex** Swarm agents for implementation in parallel where the work is independent (fall back to **gemini** for long-context / multimodal / paper edits, or when codex is rate-limited). See `CLAUDE.md` for the routing matrix and `RALPH.md` for backlog-style ralph mode
+4. Review the agent diffs (correctness, edge cases, style)
+5. Commit with message referencing `fixes #N`
+6. Push to the current branch
 
 If **no**: confirm the issue was filed and stop.

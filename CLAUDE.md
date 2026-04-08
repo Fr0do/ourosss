@@ -98,7 +98,7 @@ Gemini default model: `~/.gemini/settings.json` → `gemini-3.1-pro`. Flash via 
 - **Default agent type is `codex`** — fattest limits, burn first. Fall back to `gemini` only when codex is rate-limited or the task plays to Gemini's strengths (long context, multimodal, paper edits).
 - Never spawn claude subagents (same provider as orchestrator, wasteful).
 - Always pass `cwd`; match `effort` to task complexity.
-- `mode="edit"` for implementation, `mode="plan"` for review/exploration, `mode="ralph"` for backlog.
+- `mode="edit"` for implementation, `mode="plan"` for review/exploration, `mode="ralph"` for backlog grinding (see `RALPH.md` for invocation, stop conditions, and guards).
 - **Commits**: agents run in a git sandbox — YOU commit after agents finish.
 - Poll with `Swarm.Status(task_name)` — wait ≥2 min before first check.
 - Cost: `/agent-dashboard`
@@ -120,7 +120,9 @@ Fix all `critical` before committing; use judgment on `warn`.
 |---|---|
 | OUROBOROS.md | Research pipeline protocol |
 | PROJECTS.md | Workflow and issue routing |
+| RALPH.md | Swarm ralph-mode backlog grinder |
 | CHANGELOG.md | Version history |
+| infra/USAGE.md | Portable container cheat sheet |
 | bot/main.py | Telegram bot entry |
 | scripts/auto-dev.sh | Autonomous agent for `auto-dev` labeled issues |
 

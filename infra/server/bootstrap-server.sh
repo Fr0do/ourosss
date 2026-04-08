@@ -121,6 +121,7 @@ fi
 
 ln -snf "$REPO/infra/server/profile-exec.sh" "$BASE/bin/ourosss-profile"
 ln -snf "$REPO/infra/server/claude-profile.sh" "$BASE/bin/ourosss-claude"
+ln -snf "$REPO/infra/server/ourosss-run.sh" "$BASE/bin/ourosss-run"
 log "Installed profile wrappers in $BASE/bin"
 
 if command -v hermes >/dev/null 2>&1; then
@@ -145,6 +146,7 @@ if has_systemd_user_bus; then
   systemctl --user enable --now ourosss-sync.timer
 else
   warn "systemd --user bus unavailable; skipping user unit install"
+  log "Fallback launcher available: $BASE/bin/ourosss-run {start|stop|restart|status|logs}"
 fi
 
 # linger
@@ -166,3 +168,4 @@ if [ "$SHARED_USER_MODE" = "1" ]; then
   echo "  Claude: $BASE/bin/ourosss-claude"
   echo "  Hermes: $BASE/bin/ourosss-profile hermes <subcommand>"
 fi
+echo "  Bot fallback launcher: $BASE/bin/ourosss-run {start|stop|restart|status|logs}"

@@ -26,6 +26,15 @@ OUROSSS_SHARED_USER=1 bash ourosss/infra/server/bootstrap-server.sh
 # Run tools against ~/kurkin-scoped config
 ~/kurkin/bin/ourosss-profile hermes login
 ~/kurkin/bin/ourosss-claude
+~/kurkin/bin/ourosss-run start
+```
+
+If `systemd --user` is unavailable on the host, use the fallback launcher:
+```bash
+~/kurkin/bin/ourosss-run start
+~/kurkin/bin/ourosss-run status
+~/kurkin/bin/ourosss-run logs
+~/kurkin/bin/ourosss-run stop
 ```
 
 Push secrets from laptop (or wait for launchd):

@@ -14,7 +14,9 @@
 | Толкнуть всё на сервер прямо сейчас | `SERVER_HOST=kurkin-vllm bash infra/local/sync-push.sh` |
 | Стянуть изменения на сервере прямо сейчас | `bash ~/kurkin/ourosss/infra/server/sync-pull.sh` |
 | Перезапустить бота | `systemctl --user restart ourosss` |
+| Перезапустить бота без systemd | `~/kurkin/bin/ourosss-run restart` |
 | Логи бота | `journalctl --user -u ourosss -f` |
+| Логи бота без systemd | `~/kurkin/bin/ourosss-run logs` |
 | Логи синка (ноут) | `tail -f ~/Library/Logs/ourosss-sync.log` |
 | Логи синка (сервер) | `tail -f ~/kurkin/logs/sync.log` |
 | Проверить таймеры | `systemctl --user list-timers` |
@@ -137,9 +139,18 @@ OUROSSS_SHARED_USER=1 bash infra/server/bootstrap-server.sh
 # После этого:
 ~/kurkin/bin/ourosss-profile hermes login
 ~/kurkin/bin/ourosss-claude
+~/kurkin/bin/ourosss-run start
 ```
 
 `ourosss-profile` запускает команду с `HOME=~/kurkin/home`, так что Hermes читает `~/kurkin/home/.hermes -> ~/kurkin/hermes`, а Claude хранит свои user-level файлы в `~/kurkin/home/.claude`.
+
+Если на хосте нет `systemd --user`, используй:
+```bash
+~/kurkin/bin/ourosss-run start
+~/kurkin/bin/ourosss-run status
+~/kurkin/bin/ourosss-run logs
+~/kurkin/bin/ourosss-run stop
+```
 
 ### Проверить что попадёт в следующий sync
 ```bash

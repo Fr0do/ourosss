@@ -7,6 +7,7 @@
 | Хочу… | Команда |
 |---|---|
 | Засеять новый ноут | `bash infra/bootstrap.sh && hermes login` |
+| Восстановить Claude скиллы на новом ноуте | `bash infra/local/restore-claude-skills.sh` |
 | Засеять новый сервер | `ssh HOST 'mkdir -p ~/kurkin && cd ~/kurkin && git clone git@github.com:Fr0do/ourosss.git && bash ourosss/infra/server/bootstrap-server.sh'` |
 | Включить авто-синк на ноуте | `cp infra/local/com.ourosss.hermes-sync.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.ourosss.hermes-sync.plist` |
 | Толкнуть всё на сервер прямо сейчас | `SERVER_HOST=kurkin-vllm bash infra/local/sync-push.sh` |
@@ -22,6 +23,7 @@
 ```
 ┌─────────────────── НОУТБУК (source of truth) ───────────────────┐
 │  ~/.hermes/{config.yaml, memories/USER.md, .env, auth.json}     │
+│  ~/.claude/skills/                                              │
 │  ~/experiments/ourosss/.env                                     │
 │         │                                                       │
 │         │  launchd: каждые 30 мин                               │
@@ -29,8 +31,9 @@
 │         ▼                                                       │
 │  1. hermes skills snapshot export → infra/hermes/...            │
 │  2. cp ~/.hermes/memories/USER.md → infra/hermes/memories/      │
-│  3. git commit + push если есть diff в infra/                   │
-│  4. rsync ~/.hermes/.env, auth.json, ourosss/.env → server      │
+│  3. rsync ~/.claude/skills → infra/claude/skills/               │
+│  4. git commit + push если есть diff в infra/                   │
+│  5. rsync ~/.hermes/.env, auth.json, ourosss/.env → server      │
 └─────────────────────────────┬───────────────────────────────────┘
                               │
                 ┌─────────────┴─────────────┐
@@ -140,6 +143,14 @@ SERVER_HOST=kurkin-vllm bash infra/local/sync-push.sh
 # 3. На сервере перезапусти бот чтобы подхватил новый EnvironmentFile
 ssh kurkin-vllm 'systemctl --user restart ourosss'
 ```
+
+## Claude skills
+
+- Source of truth: `~/.claude/skills/` на ноуте, в репо только зеркало `infra/claude/skills/`.
+- Восстановить на новом ноуте: `bash infra/local/restore-claude-skills.sh` (или `--force`, чтобы перезаписать).
+- Добавить новый скилл: создать в `~/.claude/skills/` → следующий `sync-push` сам подхватит.
+- Инвентарь: `cat infra/claude/skills/README.md`.
+- Важно: это **не** project-scoped Claude skills, а чисто бэкап/инвентаризация.
 
 ## Troubleshooting
 

@@ -49,6 +49,12 @@ else
   echo "    Symlinked $HERMES_DST → $HERMES_SRC"
 fi
 
+if ! $SERVER_MODE; then
+  echo "    Restoring Claude skills from repo mirror"
+  bash "$REPO_DIR/infra/local/restore-claude-skills.sh" || \
+    echo "    Claude skills restore failed — continuing"
+fi
+
 # ── Claude project settings already in repo (.claude/settings.json) ───────────
 # Global ~/.claude/settings.json is NOT overwritten to avoid nuking other projects.
 GLOBAL_CLAUDE="$HOME/.claude/settings.json"

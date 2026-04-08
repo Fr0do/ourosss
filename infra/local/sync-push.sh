@@ -28,11 +28,20 @@ else
   echo "[$(date -u +%FT%TZ)] ~/.hermes/memories/USER.md missing — skipping memory copy" >>"$LOG_FILE"
 fi
 
+if [[ -d "$HOME/.claude/skills" ]]; then
+  log "Mirroring Claude skills"
+  mkdir -p "$REPO/infra/claude/skills"
+  rsync -a --delete "$HOME/.claude/skills/" "$REPO/infra/claude/skills/" >>"$LOG_FILE" 2>&1 || \
+    log "claude skills rsync failed"
+else
+  log "~/.claude/skills missing — skipping Claude skills mirror"
+fi
+
 if git diff --quiet infra/; then
   log "No infra changes to commit"
 else
   log "Committing infra sync"
-  git add infra/hermes/skills-snapshot.yaml infra/hermes/memories/USER.md
+  git add infra/hermes/skills-snapshot.yaml infra/hermes/memories/USER.md infra/claude/skills
   COMMIT_MSG="[infra] auto-sync hermes state ($(date -u +%Y-%m-%dT%H:%MZ))"
   if git commit -m "$COMMIT_MSG"; then
     git push origin main

@@ -4,6 +4,9 @@ set -euo pipefail
 stamp() { date -u '+%Y-%m-%dT%H:%M:%SZ'; }
 log() { echo "[$(stamp)] $*"; }
 warn() { echo "[$(stamp)] WARN: $*"; }
+has_systemd_user_bus() {
+  systemctl --user show-environment >/dev/null 2>&1
+}
 
 BASE="$HOME/kurkin"
 BASE="${OUROSSS_ROOT:-$BASE}"
@@ -120,19 +123,35 @@ ln -snf "$REPO/infra/server/profile-exec.sh" "$BASE/bin/ourosss-profile"
 ln -snf "$REPO/infra/server/claude-profile.sh" "$BASE/bin/ourosss-claude"
 log "Installed profile wrappers in $BASE/bin"
 
-# Install systemd user units
-log "Installing systemd user units"
-mkdir -p "$HOME/.config/systemd/user"
-cp "$REPO"/infra/server/ourosss.service "$REPO"/infra/server/ourosss-sync.service "$REPO"/infra/server/ourosss-sync.timer "$HOME/.config/systemd/user/"
-systemctl --user daemon-reload
-systemctl --user enable --now ourosss.service
-systemctl --user enable --now ourosss-sync.timer
+if command -v hermes >/dev/null 2>&1; then
+  log "Hermes CLI detected"
+else
+  warn "Hermes CLI not found in PATH; install it before running: $BASE/bin/ourosss-profile hermes login"
+fi
+
+if command -v claude >/dev/null 2>&1; then
+  log "Claude CLI detected"
+else
+  warn "Claude CLI not found in PATH; install it before running: $BASE/bin/ourosss-claude"
+fi
+
+# Install systemd user units when a user bus is available.
+if has_systemd_user_bus; then
+  log "Installing systemd user units"
+  mkdir -p "$HOME/.config/systemd/user"
+  cp "$REPO"/infra/server/ourosss.service "$REPO"/infra/server/ourosss-sync.service "$REPO"/infra/server/ourosss-sync.timer "$HOME/.config/systemd/user/"
+  systemctl --user daemon-reload
+  systemctl --user enable --now ourosss.service
+  systemctl --user enable --now ourosss-sync.timer
+else
+  warn "systemd --user bus unavailable; skipping user unit install"
+fi
 
 # linger
-if loginctl enable-linger "$USER"; then
+if command -v loginctl >/dev/null 2>&1 && loginctl enable-linger "$USER"; then
   log "Linger enabled for $USER"
 else
-  warn "loginctl enable-linger requires sudo; run: sudo loginctl enable-linger $USER"
+  warn "loginctl enable-linger unavailable or requires sudo; run manually if needed"
 fi
 
 log "==> Bootstrap complete"

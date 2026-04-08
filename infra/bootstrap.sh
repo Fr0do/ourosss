@@ -73,16 +73,21 @@ GLOBAL_CLAUDE="$HOME/.claude/settings.json"
 PROJECT_CLAUDE="$REPO_DIR/.claude/settings.json"
 
 echo ""
-echo "    NOTE: global Claude settings not overwritten."
-if [ -f "$GLOBAL_CLAUDE" ]; then
-  echo "    Check that $GLOBAL_CLAUDE contains the hermes + swarm MCP entries."
-  echo "    Reference: $PROJECT_CLAUDE"
-  echo "    Merge manually if needed:"
-  echo "      hermes: { command: 'hermes', args: ['mcp', 'serve'], type: 'stdio' }"
-  echo "      swarm:  { command: 'npx', args: ['-y', '@swarmify/agents-mcp'], type: 'stdio' }"
+if $SERVER_MODE && [ "$SHARED_USER_MODE" = "1" ]; then
+  echo "    NOTE: shared-user mode uses ~/kurkin/home/.claude and ~/kurkin/claude/settings.json."
+  echo "    Global ~/.claude/settings.json is ignored by the ourosss-claude wrapper."
 else
-  echo "    No global ~/.claude/settings.json found."
-  echo "    If you want project MCP servers globally, copy from $PROJECT_CLAUDE"
+  echo "    NOTE: global Claude settings not overwritten."
+  if [ -f "$GLOBAL_CLAUDE" ]; then
+    echo "    Check that $GLOBAL_CLAUDE contains the hermes + swarm MCP entries."
+    echo "    Reference: $PROJECT_CLAUDE"
+    echo "    Merge manually if needed:"
+    echo "      hermes: { command: 'hermes', args: ['mcp', 'serve'], type: 'stdio' }"
+    echo "      swarm:  { command: 'npx', args: ['-y', '@swarmify/agents-mcp'], type: 'stdio' }"
+  else
+    echo "    No global ~/.claude/settings.json found."
+    echo "    If you want project MCP servers globally, copy from $PROJECT_CLAUDE"
+  fi
 fi
 
 # ── Done ───────────────────────────────────────────────────────────────────────

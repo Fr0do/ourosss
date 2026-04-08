@@ -10,14 +10,18 @@ for arg in "$@"; do
 done
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SERVER_COMMON="$REPO_DIR/infra/server/common.sh"
 HERMES_HOME="$HOME/.hermes"
 PROFILE_HOME="$HOME"
 BASE_DIR="${OUROSSS_ROOT:-$HOME/kurkin}"
 
 if $SERVER_MODE; then
-  HERMES_HOME="$BASE_DIR/hermes"
-  PROFILE_HOME="$BASE_DIR/home"
-  mkdir -p "$BASE_DIR"
+  # shellcheck disable=SC1090
+  source "$SERVER_COMMON"
+  BASE_DIR="$(ourosss_base_dir)"
+  HERMES_HOME="$(ourosss_hermes_home)"
+  PROFILE_HOME="$(ourosss_profile_home)"
+  ourosss_ensure_profile_layout
 fi
 
 echo "==> OuroSSS bootstrap"
@@ -26,9 +30,6 @@ echo "    Hermes home: $HERMES_HOME"
 
 # ── Create dirs ────────────────────────────────────────────────────────────────
 mkdir -p "$HERMES_HOME" ~/.claude
-if $SERVER_MODE && [ "$SHARED_USER_MODE" = "1" ]; then
-  mkdir -p "$PROFILE_HOME/.claude"
-fi
 echo "    Hermes + Claude dirs ensured"
 
 if $SERVER_MODE; then

@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="${OUROSSS_ROOT:-$HOME/kurkin}"
-PROFILE_HOME="${OUROSSS_PROFILE_HOME:-$BASE/home}"
-LOG_FILE="$BASE/logs/sync.log"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/common.sh"
+
+BASE="$(ourosss_base_dir)"
+PROFILE_HOME="$(ourosss_profile_home)"
+LOG_FILE="$(ourosss_logs_dir)/sync.log"
 mkdir -p "$(dirname "$LOG_FILE")"
 exec >>"$LOG_FILE" 2>&1
 
@@ -16,7 +20,7 @@ on_err() {
 }
 trap on_err ERR
 
-REPO="$BASE/ourosss"
+REPO="$(ourosss_repo_dir)"
 
 log "---- sync start ----"
 if [ ! -d "$REPO/.git" ]; then

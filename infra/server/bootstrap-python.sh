@@ -5,8 +5,12 @@ stamp() { date -u '+%Y-%m-%dT%H:%M:%SZ'; }
 log() { echo "[$(stamp)] $*"; }
 warn() { echo "[$(stamp)] WARN: $*"; }
 
-BASE="${OUROSSS_ROOT:-$HOME/kurkin}"
-REPO="$BASE/ourosss"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/common.sh"
+
+BASE="$(ourosss_base_dir)"
+REPO="$(ourosss_repo_dir)"
 CONDA_ENV_PREFIX="${OUROSSS_CONDA_PREFIX:-$BASE/envs/ourosss-py312}"
 PYTHON_SPEC="${OUROSSS_PYTHON_SPEC:-python=3.12}"
 UV_VERSION="${OUROSSS_UV_VERSION:-0.11.4}"

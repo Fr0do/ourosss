@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REAL_HOME="${HOME}"
-BASE="${OUROSSS_ROOT:-$REAL_HOME/kurkin}"
-REPO="$BASE/ourosss"
-SECRETS="$BASE/secrets/.env"
-LOG_DIR="$BASE/logs"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/common.sh"
+
+BASE="$(ourosss_base_dir)"
+REPO="$(ourosss_repo_dir)"
+SECRETS="$(ourosss_secrets_dir)/.env"
+LOG_DIR="$(ourosss_logs_dir)"
 PID_FILE="$LOG_DIR/ourosss.pid"
 STDOUT_LOG="$LOG_DIR/ourosss.log"
 STDERR_LOG="$LOG_DIR/ourosss.err.log"

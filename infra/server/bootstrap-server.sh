@@ -8,24 +8,25 @@ has_systemd_user_bus() {
   systemctl --user show-environment >/dev/null 2>&1
 }
 
-BASE="$HOME/kurkin"
-BASE="${OUROSSS_ROOT:-$BASE}"
-REPO="$BASE/ourosss"
-HERMES_HOME="$BASE/hermes"
-PROFILE_HOME="${OUROSSS_PROFILE_HOME:-$BASE/home}"
-PROFILE_CLAUDE="$BASE/claude/settings.json"
-SECRETS="$BASE/secrets"
-LOGS="$BASE/logs"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/common.sh"
+
+BASE="$(ourosss_base_dir)"
+REPO="$(ourosss_repo_dir)"
+HERMES_HOME="$(ourosss_hermes_home)"
+PROFILE_HOME="$(ourosss_profile_home)"
+PROFILE_CLAUDE="$(ourosss_claude_settings)"
+SECRETS="$(ourosss_secrets_dir)"
+LOGS="$(ourosss_logs_dir)"
 SHARED_USER_MODE="${OUROSSS_SHARED_USER:-0}"
 
 log "==> OuroSSS server bootstrap"
 log "Base dir: $BASE"
 
-mkdir -p "$BASE" "$REPO" "$HERMES_HOME" "$SECRETS" "$LOGS" "$BASE/bin" "$BASE/claude"
-if [ "$SHARED_USER_MODE" = "1" ]; then
-  mkdir -p "$PROFILE_HOME/.claude"
-fi
-log "Ensured dirs: $BASE/{ourosss,hermes,secrets,logs,bin,claude}"
+ourosss_ensure_profile_layout
+mkdir -p "$REPO" "$SECRETS" "$LOGS"
+log "Ensured dirs: $BASE/{ourosss,hermes,secrets,logs,bin,claude,envs}"
 
 if [ ! -d "$REPO/.git" ]; then
   log "Cloning repo into $REPO"
@@ -35,15 +36,7 @@ else
   git -C "$REPO" pull --rebase --autostash
 fi
 
-# Symlink Hermes home either globally or into the isolated profile.
-if [ "$SHARED_USER_MODE" = "1" ]; then
-  ln -snf "$HERMES_HOME" "$PROFILE_HOME/.hermes"
-  if [ "$(readlink "$PROFILE_HOME/.hermes")" = "$HERMES_HOME" ]; then
-    log "Shared-user mode: symlinked $PROFILE_HOME/.hermes -> $HERMES_HOME"
-  else
-    warn "Symlink for $PROFILE_HOME/.hermes not set correctly"
-  fi
-else
+if [ "$SHARED_USER_MODE" != "1" ]; then
   if [ -e "$HOME/.hermes" ] && [ ! -L "$HOME/.hermes" ]; then
     BACKUP="$HOME/.hermes.bak.$(date -u '+%Y%m%d%H%M%S')"
     mv "$HOME/.hermes" "$BACKUP"
@@ -56,6 +49,10 @@ else
   else
     warn "Symlink for ~/.hermes not set correctly"
   fi
+elif [ "$(readlink "$PROFILE_HOME/.hermes")" = "$HERMES_HOME" ]; then
+  log "Shared-user mode: symlinked $PROFILE_HOME/.hermes -> $HERMES_HOME"
+else
+  warn "Symlink for $PROFILE_HOME/.hermes not set correctly"
 fi
 
 # Run repo bootstrap with server flag
@@ -111,14 +108,11 @@ else
 fi
 
 if [ ! -f "$PROFILE_CLAUDE" ]; then
-  cat > "$PROFILE_CLAUDE" <<'EOF'
-{
-  "mcpServers": {}
-}
-EOF
+  ourosss_ensure_claude_settings
   log "Created per-profile Claude settings at $PROFILE_CLAUDE"
 fi
 
+ln -snf "$REPO/infra/server/common.sh" "$BASE/bin/ourosss-common"
 ln -snf "$REPO/infra/server/profile-exec.sh" "$BASE/bin/ourosss-profile"
 ln -snf "$REPO/infra/server/claude-profile.sh" "$BASE/bin/ourosss-claude"
 ln -snf "$REPO/infra/server/ourosss-run.sh" "$BASE/bin/ourosss-run"

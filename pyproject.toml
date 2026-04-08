@@ -51,4 +51,4 @@ select = ["E", "F", "W"]
 ignore = ["E402"]
 
 [tool.ruff.lint.per-file-ignores]
-"bot/handlers/completions.py" = ["E501"]
+"bot/services/completions/remote_script.py" = ["E501"]

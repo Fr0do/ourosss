@@ -1,29 +1,52 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SERVER_MODE=false
+for arg in "$@"; do
+  case "$arg" in
+    --server) SERVER_MODE=true ;;
+  esac
+done
+
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+HERMES_HOME="$HOME/.hermes"
+
+if $SERVER_MODE; then
+  HERMES_HOME="$HOME/kurkin/hermes"
+  mkdir -p "$HOME/kurkin"
+fi
 
 echo "==> OuroSSS bootstrap"
 echo "    Repo: $REPO_DIR"
+echo "    Hermes home: $HERMES_HOME"
 
 # ── Create dirs ────────────────────────────────────────────────────────────────
-mkdir -p ~/.hermes ~/.claude
-echo "    ~/.hermes and ~/.claude ensured"
+mkdir -p "$HERMES_HOME" ~/.claude
+echo "    Hermes + Claude dirs ensured"
 
-# ── Symlink infra/hermes/config.yaml → ~/.hermes/config.yaml ───────────────────
+if $SERVER_MODE; then
+  # Symlink ~/.hermes → ~/kurkin/hermes
+  if [ -e "$HOME/.hermes" ] && [ ! -L "$HOME/.hermes" ]; then
+    mv "$HOME/.hermes" "$HOME/.hermes.bak.$(date -u '+%Y%m%d%H%M%S')"
+    echo "    Backed up existing ~/.hermes to ~/.hermes.bak.*"
+  fi
+  ln -snf "$HERMES_HOME" "$HOME/.hermes"
+fi
+
+# ── Symlink infra/hermes/config.yaml → $HERMES_HOME/config.yaml ───────────────
 HERMES_SRC="$REPO_DIR/infra/hermes/config.yaml"
-HERMES_DST="$HOME/.hermes/config.yaml"
+HERMES_DST="$HERMES_HOME/config.yaml"
 
 if [ -e "$HERMES_DST" ] && [ ! -L "$HERMES_DST" ]; then
   mv "$HERMES_DST" "${HERMES_DST}.bak"
-  echo "    Backed up existing ~/.hermes/config.yaml → ~/.hermes/config.yaml.bak"
+  echo "    Backed up existing $HERMES_DST → ${HERMES_DST}.bak"
 fi
 
 if [ -L "$HERMES_DST" ] && [ "$(readlink "$HERMES_DST")" = "$HERMES_SRC" ]; then
-  echo "    ~/.hermes/config.yaml already symlinked — skipping"
+  echo "    $HERMES_DST already symlinked — skipping"
 else
   ln -sf "$HERMES_SRC" "$HERMES_DST"
-  echo "    Symlinked ~/.hermes/config.yaml → $HERMES_SRC"
+  echo "    Symlinked $HERMES_DST → $HERMES_SRC"
 fi
 
 # ── Claude project settings already in repo (.claude/settings.json) ───────────

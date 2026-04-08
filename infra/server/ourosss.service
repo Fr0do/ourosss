@@ -1,0 +1,17 @@
+[Unit]
+Description=OuroSSS Telegram Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/kurkin/ourosss
+EnvironmentFile=%h/kurkin/secrets/.env
+ExecStart=/bin/bash -lc 'uv run ourosss'
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:%h/kurkin/logs/ourosss.log
+StandardError=append:%h/kurkin/logs/ourosss.err.log
+
+[Install]
+WantedBy=default.target

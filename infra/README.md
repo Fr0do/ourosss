@@ -47,3 +47,8 @@ Global `~/.claude/settings.json` is NOT overwritten — bootstrap prints a hint 
 - Edit `infra/hermes/config.yaml` (in repo) — changes apply immediately via symlink.
 - To export your Hermes skills to this repo: `hermes skills snapshot export > infra/hermes/skills-snapshot.yaml`
 - Commit both together: `git add infra/ && git commit -m "[infra] sync hermes config"`
+
+## Server deployment
+
+- See `infra/server/README.md` for the full server bootstrap + systemd setup.
+- macOS laptops auto-push Hermes state + secrets via `infra/local/com.ourosss.hermes-sync.plist` (every 30 min).

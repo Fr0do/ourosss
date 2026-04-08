@@ -1,0 +1,14 @@
+[Unit]
+Description=OuroSSS repo pull + restart if needed
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/kurkin/ourosss
+ExecStart=/bin/bash -lc '%h/kurkin/ourosss/infra/server/sync-pull.sh'
+StandardOutput=append:%h/kurkin/logs/sync.log
+StandardError=append:%h/kurkin/logs/sync.err.log
+
+[Install]
+WantedBy=default.target

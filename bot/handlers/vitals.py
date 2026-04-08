@@ -106,23 +106,8 @@ def _render_chart(data: dict) -> io.BytesIO:
     ax.set_title("GitHub Issues")
     ax.set_ylabel("count", fontsize=8)
 
-    # --- Bottom-right: team tasks by status (pie) ---
-    ax = axes[1][1]
-    team = data.get("team", {})
-    by_status = team.get("by_status", {})
-    if by_status:
-        status_labels = list(by_status.keys())
-        status_vals = list(by_status.values())
-        palette = [GREEN, AMBER, BLUE, RED, LIGHT_GRAY]
-        colors = palette[:len(status_labels)]
-        ax.pie(status_vals, labels=status_labels, colors=colors,
-               autopct=lambda p: f"{int(round(p * sum(status_vals) / 100))}" if p > 0 else "",
-               textprops={"fontsize": 8, "color": DARK_TEXT},
-               startangle=90, wedgeprops={"linewidth": 0.5, "edgecolor": "white"})
-    else:
-        ax.text(0.5, 0.5, "No task data", ha="center", va="center",
-                fontsize=10, color=DARK_TEXT, transform=ax.transAxes)
-    ax.set_title("Team Tasks")
+    # --- Bottom-right: hidden (was Team Tasks, removed) ---
+    axes[1][1].set_visible(False)
 
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=150, bbox_inches="tight",
@@ -161,15 +146,6 @@ def _format_text(data: dict) -> str:
     if release:
         lines.append(f"  Latest release: {release}")
 
-    lines.append("")
-    team = data.get("team", {})
-    lines.append("Team")
-    lines.append(f"  Total tasks: {team.get('total_tasks', '?')}")
-    by_status = team.get("by_status", {})
-    if by_status:
-        parts = [f"{k}: {v}" for k, v in by_status.items()]
-        lines.append(f"  Status: {', '.join(parts)}")
-
     return "\n".join(lines)
 
 
@@ -178,13 +154,11 @@ def _build_caption(data: dict) -> str:
     git = data.get("git", {})
     cb = data.get("codebase", {})
     gh = data.get("github", {})
-    team = data.get("team", {})
 
     parts = []
     parts.append(f"Commits: {git.get('total_commits', '?')}")
     parts.append(f"Files: {cb.get('total_files', '?')}")
     parts.append(f"Issues: {gh.get('open_issues', '?')} open")
-    parts.append(f"Tasks: {team.get('total_tasks', '?')}")
     return " | ".join(parts)
 
 

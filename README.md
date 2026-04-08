@@ -20,7 +20,8 @@
 OuroSSS is a coordination layer for autonomous research across multiple projects, machines, and AI agents:
 
 - **Telegram bot** — remote control panel for training runs, monitoring, and crash alerts (`bot/`)
-- **Multi-agent orchestration** — native Claude Code agent teams + filesystem fallback (`team/`)
+- **Multi-agent orchestration** — Hermes (memory/skills/delegation) + Swarm (codex/gemini parallel agents); see `CLAUDE.md`
+- **Portable infra** — `infra/` ships hermes config + systemd units + auto-sync; see `infra/USAGE.md`
 - **Research protocol** — project registry, workflow conventions, cross-project syncing
 - **Self-improving workflow** — issue journaling, automatic triage, feature requests from Telegram
 
@@ -34,4 +35,4 @@ uv run ourosss
 
 ## Coordination
 
-All updates to shared files are **atomic** — each change is a single, self-contained commit that doesn't leave the repo in a broken state. This enables safe parallel work by multiple Claude Code terminals (see `team/README.md`).
+All updates to shared files are **atomic** — each change is a single, self-contained commit that doesn't leave the repo in a broken state. This enables safe parallel work by multiple Claude Code terminals coordinated via Hermes + Swarm (see `CLAUDE.md`).

@@ -118,8 +118,7 @@ If the issue is complex (multi-file, multi-component, needs parallel work), you 
 2. Launch a native agent team using \`claude --agent-team\` or spawn subagents via the Agent tool.
 3. Coordinate work via issue comments: post progress updates, blockers, and subtask completions.
 4. Each teammate should work on a separate concern (e.g. backend vs frontend, tests vs implementation).
-5. The team directory \`team/tasks/\` can be used for filesystem-based coordination if needed.
-6. After all subtasks complete, do a final integration check before committing.
+5. After all subtasks complete, do a final integration check before committing.
 
 Only escalate if the issue genuinely needs it — simple features should stay single-agent.
 

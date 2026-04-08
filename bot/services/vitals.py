@@ -1,4 +1,4 @@
-"""Project vital stats — git activity, codebase metrics, GitHub, team tasks."""
+"""Project vital stats — git activity, codebase metrics, GitHub."""
 import asyncio
 import logging
 from pathlib import Path
@@ -179,57 +179,13 @@ async def github_stats() -> dict:
 
 
 # ---------------------------------------------------------------------------
-# 4. Team / task stats (YAML without pyyaml)
-# ---------------------------------------------------------------------------
-
-async def team_stats() -> dict:
-    """Parse team/tasks/*.yaml for status counts (no pyyaml dependency)."""
-    tasks_dir = REPO_ROOT / "team" / "tasks"
-    result: dict = {"total_tasks": 0, "by_status": {}}
-
-    if not tasks_dir.is_dir():
-        return result
-
-    try:
-        yaml_files = [
-            p for p in tasks_dir.iterdir()
-            if p.suffix in (".yaml", ".yml") and p.is_file()
-        ]
-    except OSError as exc:
-        logger.warning("team_stats: cannot list tasks dir: %s", exc)
-        return result
-
-    by_status: dict[str, int] = {}
-    total = 0
-
-    for path in yaml_files:
-        try:
-            text = path.read_text(errors="replace")
-        except OSError:
-            continue
-
-        total += 1
-        # Find first "status:" line and extract its value
-        for line in text.splitlines():
-            stripped = line.strip()
-            if stripped.lower().startswith("status:"):
-                status = stripped.split(":", 1)[1].strip().strip("\"'").lower()
-                by_status[status] = by_status.get(status, 0) + 1
-                break
-
-    result["total_tasks"] = total
-    result["by_status"] = by_status
-    return result
-
-
-# ---------------------------------------------------------------------------
-# 5. Collect all
+# 4. Collect all
 # ---------------------------------------------------------------------------
 
 async def collect_all() -> dict:
     """Run all vitals collectors in parallel, return combined dict."""
-    keys = ("git", "codebase", "github", "team")
-    coros = (git_activity(), codebase_stats(), github_stats(), team_stats())
+    keys = ("git", "codebase", "github")
+    coros = (git_activity(), codebase_stats(), github_stats())
 
     results = await asyncio.gather(*coros, return_exceptions=True)
 

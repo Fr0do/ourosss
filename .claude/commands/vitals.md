@@ -19,11 +19,6 @@ gh issue list --repo Fr0do/ourosss --state open --json number,title
 gh issue list --repo Fr0do/ourosss --state closed --json number | jq length
 gh release list --repo Fr0do/ourosss --limit 1
 
-# Team tasks
-ls team/tasks/*.yaml 2>/dev/null | wc -l
-grep -l "status: done" team/tasks/*.yaml 2>/dev/null | wc -l
-grep -l "status: pending" team/tasks/*.yaml 2>/dev/null | wc -l
-
 # RTK Token Savings
 rtk gain --format json --project
 rtk gain --format json --daily --project
@@ -46,9 +41,6 @@ Format the results as a Unicode dashboard:
 ║ GitHub                                   ║
 ║   Issues: N open / N closed              ║
 ║   Latest: vX.Y.Z                         ║
-╠──────────────────────────────────────────╣
-║ Team Tasks                               ║
-║   Total: N  |  Done: N  Pending: N       ║
 ╠══════════════════════════════════════════╣
 ║ RTK Token Savings (this project)         ║
 ║   Commands: N   |  Savings: 83%          ║

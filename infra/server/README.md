@@ -30,8 +30,8 @@ OUROSSS_SHARED_USER=1 bash ourosss/infra/server/bootstrap-server.sh
 ~/kurkin/bin/ourosss-run start
 ```
 
-`ourosss-bootstrap-python` creates or reuses conda env `ourosss-py312`, installs pinned `uv==0.11.4` into that env, and runs `uv sync --locked` against the repo. Override with:
-- `OUROSSS_CONDA_ENV`
+`ourosss-bootstrap-python` creates or reuses a prefix-based conda env at `~/kurkin/envs/ourosss-py312`, installs pinned `uv==0.11.4` into that env, and runs `uv sync --locked` against the repo. Override with:
+- `OUROSSS_CONDA_PREFIX`
 - `OUROSSS_PYTHON_SPEC`
 - `OUROSSS_UV_VERSION`
 

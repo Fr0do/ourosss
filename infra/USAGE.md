@@ -145,7 +145,7 @@ OUROSSS_SHARED_USER=1 bash infra/server/bootstrap-server.sh
 ```
 
 `ourosss-profile` запускает команду с `HOME=~/kurkin/home`, так что Hermes читает `~/kurkin/home/.hermes -> ~/kurkin/hermes`, а Claude хранит свои user-level файлы в `~/kurkin/home/.claude`.
-`ourosss-bootstrap-python` создаёт или переиспользует conda env `ourosss-py312`, ставит туда pinned `uv==0.11.4` и делает `uv sync --locked`.
+`ourosss-bootstrap-python` создаёт или переиспользует prefix-based conda env в `~/kurkin/envs/ourosss-py312`, ставит туда pinned `uv==0.11.4` и делает `uv sync --locked`.
 
 Если на хосте нет `systemd --user`, используй:
 ```bash

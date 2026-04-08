@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LOG_FILE="$HOME/kurkin/logs/sync.log"
+BASE="${OUROSSS_ROOT:-$HOME/kurkin}"
+PROFILE_HOME="${OUROSSS_PROFILE_HOME:-$BASE/home}"
+LOG_FILE="$BASE/logs/sync.log"
 mkdir -p "$(dirname "$LOG_FILE")"
 exec >>"$LOG_FILE" 2>&1
 
@@ -14,7 +16,6 @@ on_err() {
 }
 trap on_err ERR
 
-BASE="$HOME/kurkin"
 REPO="$BASE/ourosss"
 
 log "---- sync start ----"
@@ -52,7 +53,7 @@ printf '%s\n' "$CHANGED_FILES"
 if printf '%s\n' "$CHANGED_FILES" | grep -q 'infra/hermes/skills-snapshot.yaml'; then
   if command -v hermes >/dev/null 2>&1 && [ -s "infra/hermes/skills-snapshot.yaml" ]; then
     log "Re-importing Hermes skills snapshot"
-    hermes skills snapshot import infra/hermes/skills-snapshot.yaml || log "Hermes import failed"
+    env HOME="$PROFILE_HOME" hermes skills snapshot import infra/hermes/skills-snapshot.yaml || log "Hermes import failed"
   else
     log "Hermes CLI missing or snapshot empty; skipping import"
   fi

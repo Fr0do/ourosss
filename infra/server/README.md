@@ -6,12 +6,26 @@ Prereqs on server:
 - uv: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - (optional) gh auth login
 
+If the SSH account is shared with colleagues, use isolated profile mode so OuroSSS does not write to the shared `~/.hermes` or `~/.claude` paths.
+
 One-time setup:
 ```bash
 ssh kurkin-vllm
 mkdir -p ~/kurkin && cd ~/kurkin
 git clone git@github.com:Fr0do/ourosss.git
 bash ourosss/infra/server/bootstrap-server.sh
+```
+
+Shared-user setup:
+```bash
+ssh occ-8
+mkdir -p ~/kurkin && cd ~/kurkin
+git clone git@github.com:Fr0do/ourosss.git
+OUROSSS_SHARED_USER=1 bash ourosss/infra/server/bootstrap-server.sh
+
+# Run tools against ~/kurkin-scoped config
+~/kurkin/bin/ourosss-profile hermes login
+~/kurkin/bin/ourosss-claude
 ```
 
 Push secrets from laptop (or wait for launchd):

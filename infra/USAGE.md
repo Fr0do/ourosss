@@ -9,6 +9,7 @@
 | Засеять новый ноут | `bash infra/bootstrap.sh && hermes login` |
 | Восстановить Claude скиллы на новом ноуте | `bash infra/local/restore-claude-skills.sh` |
 | Засеять новый сервер | `ssh HOST 'mkdir -p ~/kurkin && cd ~/kurkin && git clone git@github.com:Fr0do/ourosss.git && bash ourosss/infra/server/bootstrap-server.sh'` |
+| Засеять новый сервер c shared-user профилем | `ssh HOST 'mkdir -p ~/kurkin && cd ~/kurkin && git clone git@github.com:Fr0do/ourosss.git && OUROSSS_SHARED_USER=1 bash ourosss/infra/server/bootstrap-server.sh'` |
 | Включить авто-синк на ноуте | `cp infra/local/com.ourosss.hermes-sync.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.ourosss.hermes-sync.plist` |
 | Толкнуть всё на сервер прямо сейчас | `SERVER_HOST=kurkin-vllm bash infra/local/sync-push.sh` |
 | Стянуть изменения на сервере прямо сейчас | `bash ~/kurkin/ourosss/infra/server/sync-pull.sh` |
@@ -66,7 +67,7 @@
 
 1. **Source of truth = ноутбук.** Сервер только потребляет hermes-память/скиллы. Не редактировать `infra/hermes/memories/USER.md` на сервере вручную — следующий sync-pull затрёт.
 2. **Секреты не в git, никогда.** Только через rsync (`infra/local/sync-push.sh` → `~/kurkin/secrets/`). В git живут только публичные конфиги.
-3. **Симлинки, не копии.** Hermes хардкодит `~/.hermes` — поэтому на сервере он симлинкнут в `~/kurkin/hermes`. Все файлы в `~/kurkin/secrets/` симлинкнуты туда, куда их ждут консьюмеры.
+3. **Симлинки, не копии.** Hermes хардкодит `~/.hermes` — поэтому на сервере он либо симлинкнут в `~/kurkin/hermes`, либо в shared-user режиме запускается с `HOME=~/kurkin/home`, где `~/.hermes` уже указывает в `~/kurkin/hermes`. Все файлы в `~/kurkin/secrets/` симлинкнуты туда, куда их ждут консьюмеры.
 4. **Idempotency.** Bootstrap-скрипты можно перезапускать сколько угодно — они бэкапят существующие файлы и не ломают то что уже работает.
 5. **Авто-синк не должен убивать таймер.** Все ошибки sync-pull/sync-push логируются и swallow'ятся, чтобы один кривой pull не остановил cron.
 
@@ -126,6 +127,19 @@ vim ~/.hermes/config.yaml
 # Если хочется немедленно:
 bash infra/local/sync-push.sh
 ```
+
+### Shared SSH user: изолировать Hermes и Claude под `~/kurkin`
+```bash
+# На сервере
+cd ~/kurkin/ourosss
+OUROSSS_SHARED_USER=1 bash infra/server/bootstrap-server.sh
+
+# После этого:
+~/kurkin/bin/ourosss-profile hermes login
+~/kurkin/bin/ourosss-claude
+```
+
+`ourosss-profile` запускает команду с `HOME=~/kurkin/home`, так что Hermes читает `~/kurkin/home/.hermes -> ~/kurkin/hermes`, а Claude хранит свои user-level файлы в `~/kurkin/home/.claude`.
 
 ### Проверить что попадёт в следующий sync
 ```bash

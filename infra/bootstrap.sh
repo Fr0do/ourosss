@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SERVER_MODE=false
+SHARED_USER_MODE="${OUROSSS_SHARED_USER:-0}"
 for arg in "$@"; do
   case "$arg" in
     --server) SERVER_MODE=true ;;
@@ -10,10 +11,13 @@ done
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HERMES_HOME="$HOME/.hermes"
+PROFILE_HOME="$HOME"
+BASE_DIR="${OUROSSS_ROOT:-$HOME/kurkin}"
 
 if $SERVER_MODE; then
-  HERMES_HOME="$HOME/kurkin/hermes"
-  mkdir -p "$HOME/kurkin"
+  HERMES_HOME="$BASE_DIR/hermes"
+  PROFILE_HOME="$BASE_DIR/home"
+  mkdir -p "$BASE_DIR"
 fi
 
 echo "==> OuroSSS bootstrap"
@@ -22,15 +26,23 @@ echo "    Hermes home: $HERMES_HOME"
 
 # ── Create dirs ────────────────────────────────────────────────────────────────
 mkdir -p "$HERMES_HOME" ~/.claude
+if $SERVER_MODE && [ "$SHARED_USER_MODE" = "1" ]; then
+  mkdir -p "$PROFILE_HOME/.claude"
+fi
 echo "    Hermes + Claude dirs ensured"
 
 if $SERVER_MODE; then
-  # Symlink ~/.hermes → ~/kurkin/hermes
-  if [ -e "$HOME/.hermes" ] && [ ! -L "$HOME/.hermes" ]; then
-    mv "$HOME/.hermes" "$HOME/.hermes.bak.$(date -u '+%Y%m%d%H%M%S')"
-    echo "    Backed up existing ~/.hermes to ~/.hermes.bak.*"
+  if [ "$SHARED_USER_MODE" = "1" ]; then
+    ln -snf "$HERMES_HOME" "$PROFILE_HOME/.hermes"
+    echo "    Shared-user mode: linked $PROFILE_HOME/.hermes → $HERMES_HOME"
+  else
+    # Symlink ~/.hermes → ~/kurkin/hermes
+    if [ -e "$HOME/.hermes" ] && [ ! -L "$HOME/.hermes" ]; then
+      mv "$HOME/.hermes" "$HOME/.hermes.bak.$(date -u '+%Y%m%d%H%M%S')"
+      echo "    Backed up existing ~/.hermes to ~/.hermes.bak.*"
+    fi
+    ln -snf "$HERMES_HOME" "$HOME/.hermes"
   fi
-  ln -snf "$HERMES_HOME" "$HOME/.hermes"
 fi
 
 # ── Symlink infra/hermes/config.yaml → $HERMES_HOME/config.yaml ───────────────

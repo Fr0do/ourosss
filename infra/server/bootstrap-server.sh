@@ -6,16 +6,23 @@ log() { echo "[$(stamp)] $*"; }
 warn() { echo "[$(stamp)] WARN: $*"; }
 
 BASE="$HOME/kurkin"
+BASE="${OUROSSS_ROOT:-$BASE}"
 REPO="$BASE/ourosss"
 HERMES_HOME="$BASE/hermes"
+PROFILE_HOME="${OUROSSS_PROFILE_HOME:-$BASE/home}"
+PROFILE_CLAUDE="$BASE/claude/settings.json"
 SECRETS="$BASE/secrets"
 LOGS="$BASE/logs"
+SHARED_USER_MODE="${OUROSSS_SHARED_USER:-0}"
 
 log "==> OuroSSS server bootstrap"
 log "Base dir: $BASE"
 
-mkdir -p "$BASE" "$REPO" "$HERMES_HOME" "$SECRETS" "$LOGS"
-log "Ensured dirs: $BASE/{ourosss,hermes,secrets,logs}"
+mkdir -p "$BASE" "$REPO" "$HERMES_HOME" "$SECRETS" "$LOGS" "$BASE/bin" "$BASE/claude"
+if [ "$SHARED_USER_MODE" = "1" ]; then
+  mkdir -p "$PROFILE_HOME/.claude"
+fi
+log "Ensured dirs: $BASE/{ourosss,hermes,secrets,logs,bin,claude}"
 
 if [ ! -d "$REPO/.git" ]; then
   log "Cloning repo into $REPO"
@@ -25,18 +32,27 @@ else
   git -C "$REPO" pull --rebase --autostash
 fi
 
-# Symlink ~/.hermes -> ~/kurkin/hermes (backup existing dir)
-if [ -e "$HOME/.hermes" ] && [ ! -L "$HOME/.hermes" ]; then
-  BACKUP="$HOME/.hermes.bak.$(date -u '+%Y%m%d%H%M%S')"
-  mv "$HOME/.hermes" "$BACKUP"
-  log "Backed up existing ~/.hermes to $BACKUP"
-fi
-
-ln -snf "$HERMES_HOME" "$HOME/.hermes"
-if [ "$(readlink "$HOME/.hermes")" = "$HERMES_HOME" ]; then
-  log "Symlinked ~/.hermes -> $HERMES_HOME"
+# Symlink Hermes home either globally or into the isolated profile.
+if [ "$SHARED_USER_MODE" = "1" ]; then
+  ln -snf "$HERMES_HOME" "$PROFILE_HOME/.hermes"
+  if [ "$(readlink "$PROFILE_HOME/.hermes")" = "$HERMES_HOME" ]; then
+    log "Shared-user mode: symlinked $PROFILE_HOME/.hermes -> $HERMES_HOME"
+  else
+    warn "Symlink for $PROFILE_HOME/.hermes not set correctly"
+  fi
 else
-  warn "Symlink for ~/.hermes not set correctly"
+  if [ -e "$HOME/.hermes" ] && [ ! -L "$HOME/.hermes" ]; then
+    BACKUP="$HOME/.hermes.bak.$(date -u '+%Y%m%d%H%M%S')"
+    mv "$HOME/.hermes" "$BACKUP"
+    log "Backed up existing ~/.hermes to $BACKUP"
+  fi
+
+  ln -snf "$HERMES_HOME" "$HOME/.hermes"
+  if [ "$(readlink "$HOME/.hermes")" = "$HERMES_HOME" ]; then
+    log "Symlinked ~/.hermes -> $HERMES_HOME"
+  else
+    warn "Symlink for ~/.hermes not set correctly"
+  fi
 fi
 
 # Run repo bootstrap with server flag
@@ -64,7 +80,7 @@ fi
 SNAPSHOT="$REPO/infra/hermes/skills-snapshot.yaml"
 if [ -s "$SNAPSHOT" ] && command -v hermes >/dev/null 2>&1; then
   log "Importing Hermes skills snapshot"
-  hermes skills snapshot import "$SNAPSHOT" || warn "Hermes import failed"
+  env HOME="$PROFILE_HOME" hermes skills snapshot import "$SNAPSHOT" || warn "Hermes import failed"
 else
   warn "Skills snapshot missing/empty or hermes CLI unavailable; skipping import"
 fi
@@ -91,6 +107,19 @@ else
   warn "Secret missing: $SECRETS/hermes.env (Hermes env)"
 fi
 
+if [ ! -f "$PROFILE_CLAUDE" ]; then
+  cat > "$PROFILE_CLAUDE" <<'EOF'
+{
+  "mcpServers": {}
+}
+EOF
+  log "Created per-profile Claude settings at $PROFILE_CLAUDE"
+fi
+
+ln -snf "$REPO/infra/server/profile-exec.sh" "$BASE/bin/ourosss-profile"
+ln -snf "$REPO/infra/server/claude-profile.sh" "$BASE/bin/ourosss-claude"
+log "Installed profile wrappers in $BASE/bin"
+
 # Install systemd user units
 log "Installing systemd user units"
 mkdir -p "$HOME/.config/systemd/user"
@@ -113,3 +142,8 @@ echo "  $SECRETS/auth.json   -> hermes auth"
 echo "  $SECRETS/hermes.env  -> hermes env"
 echo "Logs: tail -f $LOGS/ourosss.log or journalctl --user -u ourosss -f"
 echo "Restart bot: systemctl --user restart ourosss"
+if [ "$SHARED_USER_MODE" = "1" ]; then
+  echo "Shared-user mode:"
+  echo "  Claude: $BASE/bin/ourosss-claude"
+  echo "  Hermes: $BASE/bin/ourosss-profile hermes <subcommand>"
+fi
